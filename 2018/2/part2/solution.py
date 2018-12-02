@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
-import string
-
 with open("../input", "r") as file:
     myInput = file.read().split('\n')
     myInput = myInput[:-1] # remove last line, an empty one
-    letters = list(string.ascii_lowercase) # ['a', 'b', 'c'...]
     for i in range(0, len(myInput)):
         for j in myInput[:i]:
             differences = 0
