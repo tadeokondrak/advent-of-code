@@ -30,7 +30,6 @@ workers = [ (0, None) for i in range(WORKER_COUNT) ]
 
 seconds_elapsed = 0
 steps_in_progress = []
-steps_done = []
 
 while True:
     for index in range(len(workers)):
@@ -38,7 +37,6 @@ while True:
             workers[index] = (workers[index][0] - 1, workers[index][1])
         if workers[index][0] == 0 and workers[index][1] != None:
             steps_in_progress.remove(workers[index][1])
-            steps_done.append(workers[index][1])
             del steps[workers[index][1]]
             workers[index] = (0, None)
 
