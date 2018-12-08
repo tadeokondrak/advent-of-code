@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-def get_length(node):
+def get_length(node: dict) -> int:
     length = 2
     length += len(node['metadata'])
     for child_node in node['children']:
