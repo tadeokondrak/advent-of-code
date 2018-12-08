@@ -36,7 +36,6 @@ def parse_node(input_list: list) -> dict:
 
     return {'metadata': metadata, 'children': children, 'metadata_sum': metadata_sum, 'value': value}
 
-
 with open('../input', 'r') as input_file:
     input_list = [int(x) for x in input_file.read().strip().split(' ')]
     print("Part 1:", parse_node(input_list)['metadata_sum'])
