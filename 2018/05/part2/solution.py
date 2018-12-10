@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from textwrap import wrap
 import string
 
 input_line = open('../input', 'r').read()[:-1]

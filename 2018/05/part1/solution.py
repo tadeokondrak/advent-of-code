@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-from textwrap import wrap
-
 input_line = open('../input', 'r').read()[:-1]
 
 polymer = input_line
