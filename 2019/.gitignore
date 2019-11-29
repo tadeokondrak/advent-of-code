@@ -1,0 +1,5 @@
+/build
+/input
+/output
+.ninja_log
+.ninja_deps
