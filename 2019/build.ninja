@@ -1,7 +1,10 @@
 year = 2019
 
+# rustflags = -C opt-level=2 -C lto
+rustflags = -C opt-level=0 -C debuginfo=2
+
 rule build
-  command = rustc -C opt-level=0 -C debuginfo=2 $day.rs -o build/$day
+  command = rustc $rustflags $day.rs -o build/$day
   description = Building day $day
 
 rule input
@@ -20,8 +23,8 @@ rule run
   command = cat output/$day
   description = Day $day
 
-build all: phony
-#  output/01
+build all: phony $
+  output/01
 #  output/02
 #  output/03
 #  output/04
