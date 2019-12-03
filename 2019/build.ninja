@@ -1,7 +1,7 @@
 year = 2019
 
-#rustflags = -C opt-level=2 -C lto
-rustflags = -C opt-level=0 -C debuginfo=2
+rustflags = -C opt-level=2 -C lto
+#rustflags = -C opt-level=0 -C debuginfo=2
 
 rule build
   command = rustc $rustflags $day.rs -o build/$day
@@ -25,8 +25,8 @@ rule run
 
 build all: phony $
   output/01 $
-  output/02
-#  output/03
+  output/02 $
+  output/03
 #  output/04
 #  output/05
 #  output/06
