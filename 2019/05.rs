@@ -53,13 +53,15 @@ impl Intcode {
         let mode = (instr / 100 % 10, instr / 1000 % 10);
         let op = instr % 100;
         match op {
-            OP_ADD | OP_MUL => {
+            OP_ADD | OP_MUL | OP_LT | OP_EQ => {
                 let a = self.load(mode.0, 1);
                 let b = self.load(mode.1, 2);
                 let dst = self.load(LOAD_IMM, 3);
                 match op {
                     OP_ADD => self.store(dst, a + b),
                     OP_MUL => self.store(dst, a * b),
+                    OP_LT => self.store(dst, (a < b) as i32),
+                    OP_EQ => self.store(dst, (a == b) as i32),
                     _ => unreachable!(),
                 };
                 self.iptr += 4;
@@ -87,22 +89,6 @@ impl Intcode {
                 } else {
                     self.iptr += 3;
                 }
-                Some(Step::Continue)
-            }
-            OP_LT | OP_EQ => {
-                let a = self.load(mode.0, 1);
-                let b = self.load(mode.1, 2);
-                let dst = self.load(LOAD_IMM, 3);
-                if match op {
-                    OP_LT => a < b,
-                    OP_EQ => a == b,
-                    _ => unreachable!(),
-                } {
-                    self.store(dst, 1);
-                } else {
-                    self.store(dst, 0);
-                }
-                self.iptr += 4;
                 Some(Step::Continue)
             }
             OP_HALT => {
