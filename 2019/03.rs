@@ -1,48 +1,39 @@
-use std::{
-    collections::HashMap,
-    i32,
-    io::{stdin, BufRead},
-};
+use std::collections::HashMap;
+use std::io::{stdin, BufRead};
 
 fn main() {
-    let lines = stdin()
+    let wire = stdin()
         .lock()
         .lines()
-        .map(Result::unwrap)
         .map(|line| {
-            line.split(',')
-                .map(|cmd| cmd.split_at(1))
-                .map(|(dir, steps)| (dir.chars().next().unwrap(), steps.parse().unwrap()))
+            line.unwrap()
+                .split(',')
+                .scan((0, 0, 0), |(ref mut x, ref mut y, ref mut step), seg| {
+                    let (dir, steps) = seg.split_at(1);
+                    let steps = steps.parse::<isize>().unwrap();
+                    let entries = (*step..*step + steps)
+                        .map(|i| {
+                            match dir {
+                                "L" => *x -= 1,
+                                "R" => *x += 1,
+                                "U" => *y += 1,
+                                "D" => *y -= 1,
+                                _ => unreachable!(),
+                            };
+                            ((*x, *y), i + 1)
+                        })
+                        .collect::<Vec<_>>();
+                    *step += steps;
+                    Some(entries)
+                })
+                .flatten()
                 .collect()
         })
-        .map(|line: Vec<(char, i32)>| {
-            let mut grid = HashMap::new();
-            let (mut x, mut y, mut step): (i32, i32, i32) = (0, 0, 0);
-            grid.insert((x, y), step);
-            for (dir, steps) in line {
-                for _ in 0..steps {
-                    step += 1;
-                    match dir {
-                        'L' => x -= 1,
-                        'R' => x += 1,
-                        'U' => y += 1,
-                        'D' => y -= 1,
-                        _ => unreachable!(),
-                    };
-                    grid.entry((x, y)).or_insert(step);
-                }
-            }
-            grid
-        })
-        .collect::<Vec<_>>();
+        .collect::<Vec<HashMap<(isize, isize), isize>>>();
 
-    let (p1, p2) = lines[0]
-        .iter()
-        .filter(|(&(x, y), _)| x != 0 && y != 0)
-        .filter(|(pos, _)| lines[1].contains_key(pos))
-        .fold((i32::MAX, i32::MAX), |(p1, p2), (&(x, y), &cost1)| {
-            (p1.min(x.abs() + y.abs()), p2.min(cost1 + lines[1][&(x, y)]))
-        });
+    let iter = wire[0].iter().filter(|(pos, _)| wire[1].contains_key(pos));
+    let p1 = iter.clone().map(|(pos, _)| pos.0.abs() + pos.1.abs()).min();
+    let p2 = iter.map(|(pos, cost)| cost + wire[1][pos]).min();
 
-    println!("Part 1: {}\nPart 2: {}", p1, p2);
+    println!("Part 1: {}\nPart 2: {}", p1.unwrap(), p2.unwrap());
 }
