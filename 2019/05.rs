@@ -1,5 +1,4 @@
 use std::io::stdin;
-use std::ops::{Index, IndexMut};
 
 const OP_ADD: i32 = 1;
 const OP_MUL: i32 = 2;
@@ -23,7 +22,6 @@ enum Step<'a> {
     Continue,
     Input(&'a mut i32),
     Output(i32),
-    Done,
 }
 
 impl Intcode {
@@ -34,45 +32,52 @@ impl Intcode {
         }
     }
 
-    fn load(&mut self, mode: i32, idx: i32) -> i32 {
+    fn load(&self, mode: i32, idx: i32) -> i32 {
         match mode {
-            LOAD_POS => self[self[self.iptr + idx]],
-            LOAD_IMM => self[self.iptr + idx],
+            LOAD_POS => self.memory[self.memory[self.iptr as usize + idx as usize] as usize],
+            LOAD_IMM => self.memory[self.iptr as usize + idx as usize],
             _ => panic!("invalid load mode: {}", mode),
         }
     }
 
-    fn step(&mut self) -> Step {
+    fn store(&mut self, idx: i32, val: i32) {
+        self.memory[idx as usize] = val
+    }
+
+    fn address(&mut self, idx: i32) -> &mut i32 {
+        &mut self.memory[idx as usize]
+    }
+
+    fn step(&mut self) -> Option<Step> {
         let instr = self.load(LOAD_IMM, 0);
-        let mode2 = instr / 1000 % 10;
-        let mode1 = instr / 100 % 10;
-        let op = (instr / 10 % 10 * 10) + (instr % 10);
+        let mode = (instr / 100 % 10, instr / 1000 % 10);
+        let op = instr % 100;
         match op {
             OP_ADD | OP_MUL => {
-                let a = self.load(mode1, 1);
-                let b = self.load(mode2, 2);
+                let a = self.load(mode.0, 1);
+                let b = self.load(mode.1, 2);
                 let dst = self.load(LOAD_IMM, 3);
-                self[dst] = match op {
-                    OP_ADD => a + b,
-                    OP_MUL => a * b,
+                match op {
+                    OP_ADD => self.store(dst, a + b),
+                    OP_MUL => self.store(dst, a * b),
                     _ => unreachable!(),
                 };
                 self.iptr += 4;
-                Step::Continue
+                Some(Step::Continue)
             }
             OP_INPUT => {
                 let dst = self.load(LOAD_IMM, 1);
                 self.iptr += 2;
-                Step::Input(&mut self[dst])
+                Some(Step::Input(self.address(dst)))
             }
             OP_OUTPUT => {
-                let output = self.load(mode1, 1);
+                let output = self.load(mode.0, 1);
                 self.iptr += 2;
-                Step::Output(output)
+                Some(Step::Output(output))
             }
             OP_JMPT | OP_JMPF => {
-                let flag = self.load(mode1, 1);
-                let dst = self.load(mode2, 2);
+                let flag = self.load(mode.0, 1);
+                let dst = self.load(mode.1, 2);
                 if match op {
                     OP_JMPT => flag != 0,
                     OP_JMPF => flag == 0,
@@ -82,27 +87,27 @@ impl Intcode {
                 } else {
                     self.iptr += 3;
                 }
-                Step::Continue
+                Some(Step::Continue)
             }
             OP_LT | OP_EQ => {
-                let a = self.load(mode1, 1);
-                let b = self.load(mode2, 2);
+                let a = self.load(mode.0, 1);
+                let b = self.load(mode.1, 2);
                 let dst = self.load(LOAD_IMM, 3);
                 if match op {
                     OP_LT => a < b,
                     OP_EQ => a == b,
                     _ => unreachable!(),
                 } {
-                    self[dst] = 1;
+                    self.store(dst, 1);
                 } else {
-                    self[dst] = 0;
+                    self.store(dst, 0);
                 }
                 self.iptr += 4;
-                Step::Continue
+                Some(Step::Continue)
             }
             OP_HALT => {
                 self.iptr += 1;
-                Step::Done
+                None
             }
             _ => panic!("invalid opcode: {}", op),
         }
@@ -110,41 +115,21 @@ impl Intcode {
 
     fn run(&mut self, input: i32) -> i32 {
         let mut output = 0;
-        loop {
-            match self.step() {
+        while let Some(step) = self.step() {
+            match step {
                 Step::Continue => continue,
                 Step::Input(i) => *i = input,
                 Step::Output(o) => output = o,
-                Step::Done => break,
             }
         }
         output
     }
 }
 
-impl Index<i32> for Intcode {
-    type Output = i32;
-    fn index(&self, idx: i32) -> &Self::Output {
-        &self.memory[idx as usize]
-    }
-}
-
-impl IndexMut<i32> for Intcode {
-    fn index_mut(&mut self, idx: i32) -> &mut Self::Output {
-        &mut self.memory[idx as usize]
-    }
-}
-
 fn main() {
     let mut prog = String::new();
     stdin().read_line(&mut prog).unwrap();
-
-    let prog = prog
-        .trim()
-        .split(',')
-        .map(|x| x.parse().unwrap())
-        .collect::<Vec<_>>();
-
+    let prog: Vec<i32> = prog.trim().split(',').map(|x| x.parse().unwrap()).collect();
     println!(
         "Part 1: {}\nPart 2: {}",
         Intcode::new(prog.clone()).run(1),
