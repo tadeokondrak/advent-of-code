@@ -18,5 +18,6 @@ fn main() {
         .map(|line| line.unwrap().parse().unwrap())
         .map(|num| (fuel(num), fuel_rec(num)))
         .fold((0, 0), |(f1, f2), (a1, a2)| (a1 + f1, a2 + f2));
+
     println!("Part 1: {}\nPart 2: {}", p1, p2);
 }
