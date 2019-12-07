@@ -1,10 +1,12 @@
 year = 2019
 
-rustflags = -C opt-level=2 -C lto
-#rustflags = -C opt-level=0 -C debuginfo=2
+rustc = rustc
+rustflags = -C opt-level=0
+#rustc = clippy-driver
+#rustflags = -C opt-level=2 -C lto
 
 rule build
-  command = rustc $rustflags $day.rs -o build/$day
+  command = $rustc $rustflags $day.rs -o build/$day
   description = Building day $day
 
 rule input
@@ -26,8 +28,8 @@ rule run
 build all: phony $
   output/01 $
   output/02 $
-  output/03
-#  output/04
+  output/03 $
+  output/04
 #  output/05
 #  output/06
 #  output/07
@@ -65,7 +67,7 @@ build 02: run output/02
   day = 02
 build input/02: input
   day = 02
-build build/02: build 02.rs
+build build/02: build 02.rs intcode.rs
   day = 02
 build output/02: output input/02 build/02
   day = 02
@@ -92,7 +94,7 @@ build 05: run output/05
   day = 05
 build input/05: input
   day = 05
-build build/05: build 05.rs
+build build/05: build 05.rs intcode.rs
   day = 05
 build output/05: output input/05 build/05
   day = 05
@@ -110,7 +112,7 @@ build 07: run output/07
   day = 07
 build input/07: input
   day = 07
-build build/07: build 07.rs
+build build/07: build 07.rs intcode.rs
   day = 07
 build output/07: output input/07 build/07
   day = 07
