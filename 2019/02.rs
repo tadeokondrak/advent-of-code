@@ -10,10 +10,10 @@ fn main() {
     for a in 0..100 {
         for b in 0..100 {
             let mut intcode = intcode.clone();
-            intcode.memory[1] = a;
-            intcode.memory[2] = b;
+            intcode.mem[1] = a;
+            intcode.mem[2] = b;
             intcode.run(|| unreachable!(), |_| unreachable!()).unwrap();
-            let result = intcode.memory[0];
+            let result = intcode.mem[0];
             if a == 12 && b == 2 {
                 println!("Part 1: {}", result);
             }

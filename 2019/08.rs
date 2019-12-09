@@ -22,21 +22,18 @@ fn main() {
         .map(|(_, ones, twos)| ones * twos)
         .unwrap();
 
-    println!("Part 1: {}", p1);
+    println!("Part 1: {}\nPart 2:", p1);
 
-    let rendered = (0..width * height)
+    (0..width * height)
         .map(|i| layers.iter().find(|layer| layer[i] != 2).unwrap()[i])
-        .collect::<Vec<_>>();
-
-    println!("Part 2: ");
-    (0..height).for_each(|y| {
-        for x in 0..width {
-            match rendered[x + y * width] {
+        .collect::<Vec<_>>()
+        .chunks(width)
+        .for_each(|chunk| {
+            chunk.into_iter().for_each(|pixel| match pixel {
                 0 => print!("\x1B[48;5;0m "),
                 1 => print!("\x1B[48;5;7m#"),
                 _ => unreachable!(),
-            }
-        }
-        println!("\x1B[0m");
-    });
+            });
+            println!("\x1B[0m");
+        });
 }

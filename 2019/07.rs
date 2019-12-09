@@ -4,7 +4,7 @@ use std::io::stdin;
 mod intcode;
 use intcode::Intcode;
 
-fn run(intcode: &Intcode, inputs: &[i32]) -> i32 {
+fn run(intcode: &Intcode, inputs: &[i64]) -> i64 {
     let out = Cell::new(0);
     let mut intcodes = inputs
         .iter()
