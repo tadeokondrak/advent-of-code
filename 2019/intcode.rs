@@ -26,7 +26,7 @@ pub struct Intcode {
 }
 
 #[derive(Debug)]
-enum Step<'a> {
+pub enum Step<'a> {
     Continue,
     Input(&'a mut i64),
     Output(i64),
@@ -37,12 +37,6 @@ enum Step<'a> {
 pub enum Error {
     InvalidOpcode(i64),
     InvalidParameterMode(i64),
-    OutOfBoundsLoad(i64),
-    OutOfBoundsStore(i64),
-    #[cfg(debug_assertions)]
-    AddOverflow(i64, i64),
-    #[cfg(debug_assertions)]
-    MulOverflow(i64, i64),
     NotEnoughInputs,
 }
 
@@ -51,12 +45,6 @@ impl Display for Error {
         match self {
             Error::InvalidOpcode(op) => write!(f, "Invalid opcode {}", op),
             Error::InvalidParameterMode(mode) => write!(f, "Invalid parameter mode {}", mode),
-            Error::OutOfBoundsLoad(idx) => write!(f, "Out of bounds load to index {}", idx),
-            Error::OutOfBoundsStore(idx) => write!(f, "Out of bounds store to index {}", idx),
-            #[cfg(debug_assertions)]
-            Error::AddOverflow(a, b) => write!(f, "Addition overflow: {} + {}", a, b),
-            #[cfg(debug_assertions)]
-            Error::MulOverflow(a, b) => write!(f, "Multiplication overflow: {} * {}", a, b),
             Error::NotEnoughInputs => write!(f, "Not enough inputs"),
         }
     }
@@ -76,43 +64,50 @@ impl Intcode {
         })
     }
 
-    fn get(&mut self, idx: usize) -> &mut i64 {
-        if self.mem.len() < idx as usize + 1 {
-            self.mem.resize(idx as usize + 1, 0);
-        }
-        &mut self.mem[idx]
-    }
-
     fn load(&mut self, mode: i64, idx: i64) -> Result<i64, Error> {
         match mode {
-            LOAD_POS => {
-                let idx = *self.get(self.ip as usize + idx as usize);
-                Ok(*self.get(idx as usize))
-            }
-            LOAD_IMM => Ok(*self.get(self.ip as usize + idx as usize)),
-            LOAD_REL => {
-                let idx = *self.get(self.ip as usize + idx as usize);
-                Ok(*self.get((idx as isize + self.base as isize) as usize))
-            }
+            LOAD_POS => match self.mem.get(self.ip as usize + idx as usize) {
+                Some(&idx) => Ok(*self.mem.get(idx as usize).unwrap_or(&0)),
+                None => Ok(0),
+            },
+            LOAD_IMM => Ok(*self.mem.get(self.ip as usize + idx as usize).unwrap_or(&0)),
+            LOAD_REL => match self.mem.get(self.ip as usize + idx as usize) {
+                Some(&idx) => Ok(*self
+                    .mem
+                    .get((idx as isize + self.base as isize) as usize)
+                    .unwrap_or(&0)),
+                None => Ok(0),
+            },
             _ => Err(Error::InvalidParameterMode(mode)),
         }
     }
 
     fn store(&mut self, mode: i64, idx: i64, val: i64) -> Result<(), Error> {
-        *self.address(mode, idx)? = val;
-        Ok(())
+        Ok(*self.address(mode, idx)? = val)
     }
 
     fn address(&mut self, mode: i64, idx: i64) -> Result<&mut i64, Error> {
         let idx = match mode {
-            LOAD_POS => *self.get((self.ip as isize + idx as isize) as usize),
-            LOAD_REL => *self.get((self.ip as isize + idx as isize) as usize) + self.base,
+            LOAD_POS => *self
+                .mem
+                .get((self.ip as isize + idx as isize) as usize)
+                .unwrap_or(&0),
+            LOAD_REL => {
+                *self
+                    .mem
+                    .get((self.ip as isize + idx as isize) as usize)
+                    .unwrap_or(&0)
+                    + self.base
+            }
             _ => return Err(Error::InvalidParameterMode(mode)),
         };
-        Ok(self.get(idx as usize))
+        if self.mem.len() <= idx as usize {
+            self.mem.resize(idx as usize + 1, 0);
+        }
+        Ok(&mut self.mem[idx as usize])
     }
 
-    fn step(&mut self) -> Result<Step, Error> {
+    pub fn step(&mut self) -> Result<Step, Error> {
         let instr = self.load(LOAD_IMM, 0)?;
         let mode = (instr / 100 % 10, instr / 1000 % 10, instr / 10000 % 10);
         let op = instr % 100;
@@ -124,13 +119,7 @@ impl Intcode {
                     mode.2,
                     3,
                     match op {
-                        #[cfg(debug_assertions)]
-                        OP_ADD => a.checked_add(b).ok_or(Error::AddOverflow(a, b))?,
-                        #[cfg(not(debug_assertions))]
                         OP_ADD => a.wrapping_add(b),
-                        #[cfg(debug_assertions)]
-                        OP_MUL => a.checked_mul(b).ok_or(Error::MulOverflow(a, b))?,
-                        #[cfg(not(debug_assertions))]
                         OP_MUL => a.wrapping_mul(b),
                         OP_LT => (a < b) as i64,
                         OP_EQ => (a == b) as i64,
@@ -150,22 +139,21 @@ impl Intcode {
                 Ok(Step::Output(output))
             }
             OP_JNZ | OP_JZ => {
-                let flag = self.load(mode.0, 1)?;
-                let dest = self.load(mode.1, 2)?;
-                if match op {
-                    OP_JNZ => flag != 0,
-                    OP_JZ => flag == 0,
+                if match (op, self.load(mode.0, 1)?) {
+                    (OP_JNZ, 0) => false,
+                    (OP_JNZ, _) => true,
+                    (OP_JZ, 0) => true,
+                    (OP_JZ, _) => false,
                     _ => unreachable!(),
                 } {
-                    self.ip = dest;
+                    self.ip = self.load(mode.1, 2)?;
                 } else {
                     self.ip += 3;
                 }
                 Ok(Step::Continue)
             }
             OP_RELBASE => {
-                let diff = self.load(mode.0, 1)?;
-                self.base += diff;
+                self.base += self.load(mode.0, 1)?;
                 self.ip += 2;
                 Ok(Step::Continue)
             }

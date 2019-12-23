@@ -11,9 +11,8 @@ fn fuel_rec(weight: usize) -> usize {
     }
 }
 
-fn main() {
-    let (p1, p2) = stdin()
-        .lock()
+pub fn run(r: impl BufRead) {
+    let (p1, p2) = r
         .lines()
         .map(|line| line.unwrap().parse().unwrap())
         .map(|num| (fuel(num), fuel_rec(num)))
