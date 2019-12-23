@@ -50,7 +50,7 @@ fn main() {
                             queues[dst as usize].push_front(y);
                         }
                     }
-                    Step::End => panic!(),
+                    Step::End => unreachable!(),
                 }
             }
         }
