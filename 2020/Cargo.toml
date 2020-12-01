@@ -5,6 +5,6 @@ authors = ["Tadeo Kondrak <me@tadeo.ca>"]
 edition = "2018"
 publish = false
 
-# [[bin]]
-# name = "00"
-# path = "00.rs"
+[[bin]]
+name = "01"
+path = "01.rs"
