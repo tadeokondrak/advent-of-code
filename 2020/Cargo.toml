@@ -1,0 +1,10 @@
+[package]
+name = "advent-of-code-2020"
+version = "0.1.0"
+authors = ["Tadeo Kondrak <me@tadeo.ca>"]
+edition = "2018"
+publish = false
+
+# [[bin]]
+# name = "00"
+# path = "00.rs"
