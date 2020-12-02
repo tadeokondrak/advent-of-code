@@ -8,3 +8,7 @@ publish = false
 [[bin]]
 name = "01"
 path = "01.rs"
+
+[[bin]]
+name = "02"
+path = "02.rs"
