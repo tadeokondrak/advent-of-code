@@ -4,6 +4,18 @@ fn main() {
         input_dir: "input"
         challenges: [
             {
+                "2021-2-2": day2part2,
+                tests: [
+                    { name: "1", input: "forward 5\ndown 5\nforward 8\nup 3\ndown 8\nforward 2", output: "900" }
+                ]
+            }
+            {
+                "2021-2-1": day2part1,
+                tests: [
+                    { name: "1", input: "forward 5\ndown 5\nforward 8\nup 3\ndown 8\nforward 2", output: "150" }
+                ]
+            }
+            {
                 "2021-1-2": day1part2,
                 tests: [
                     { name: "1", input: "199\n200\n208\n210\n200\n207\n240\n269\n260\n263", output: "5" }
@@ -17,6 +29,54 @@ fn main() {
             }
         ]
     }
+}
+
+fn day2part2(input: &str) -> i32 {
+    let mut aim = 0;
+    let mut xpos = 0;
+    let mut ypos = 0;
+    for cmd in input.lines() {
+        let mut split = cmd.split(' ');
+        let cmd = split.next().unwrap();
+        let val: i32 = split.next().unwrap().parse().unwrap();
+        match cmd {
+            "forward" => {
+                xpos += val;
+                ypos += val * aim;
+            },
+            "down" => {
+                aim += val;
+            },
+            "up" => {
+                aim -= val;
+            },
+            _ => panic!(),
+        }
+    }
+    xpos * ypos
+}
+
+fn day2part1(input: &str) -> i32 {
+    let mut xpos = 0;
+    let mut ypos = 0;
+    for cmd in input.lines() {
+        let mut split = cmd.split(' ');
+        let cmd = split.next().unwrap();
+        let val: i32 = split.next().unwrap().parse().unwrap();
+        match cmd {
+            "forward" => {
+                xpos += val;
+            },
+            "down" => {
+                ypos += val;
+            },
+            "up" => {
+                ypos -= val;
+            },
+            _ => panic!(),
+        }
+    }
+    xpos * ypos
 }
 
 fn day1part2(input: &str) -> i32 {
