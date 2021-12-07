@@ -9,6 +9,18 @@ fn main() {
         input_dir: "input"
         challenges: [
             {
+                "2021-7-2": day7part2,
+                tests: [
+                    { name: "1", input: "16,1,2,0,4,2,7,1,2,14", output: "168" }
+                ]
+            }
+            {
+                "2021-7-1": day7part1,
+                tests: [
+                    { name: "1", input: "16,1,2,0,4,2,7,1,2,14", output: "37" }
+                ]
+            }
+            {
                 "2021-6-2": day6part2,
                 tests: [
                     { name: "1", input: "3,4,3,1,2", output: "26984457539" }
@@ -135,6 +147,46 @@ fn main() {
             }
         ]
     }
+}
+
+fn day7part2(input: &str) -> i32 {
+    let crabs = input
+        .trim()
+        .split(",")
+        .map(|x| x.parse::<i32>().unwrap())
+        .collect::<Vec<_>>();
+    let biggest_crab = crabs.iter().copied().max().unwrap();
+    let mut list = Vec::new();
+    for i in 0..biggest_crab {
+        let mut fuel_needed = 0;
+        for &crab in &crabs {
+            let dist = (crab - i).abs();
+            let cost = dist * (dist + 1) / 2;
+            fuel_needed += cost;
+        }
+        list.push((fuel_needed, i));
+    }
+    list.sort();
+    list[0].0
+}
+
+fn day7part1(input: &str) -> i32 {
+    let crabs = input
+        .trim()
+        .split(",")
+        .map(|x| x.parse::<i32>().unwrap())
+        .collect::<Vec<_>>();
+    let biggest_crab = crabs.iter().copied().max().unwrap();
+    let mut list = Vec::new();
+    for i in 0..biggest_crab {
+        let mut fuel_needed = 0;
+        for &crab in &crabs {
+            fuel_needed += (crab - i).abs();
+        }
+        list.push((fuel_needed, i));
+    }
+    list.sort();
+    list[0].0
 }
 
 fn day6(input: &str, iterations: usize) -> u64 {
