@@ -9,6 +9,36 @@ fn main() {
         input_dir: "input"
         challenges: [
             {
+                "2021-10-2": day10part2,
+                tests: [
+                    { name: "0", input: "[({(<(())[]>[[{[]{<()<>>
+[(()[<>])]({[<{<<[]>>(
+{([(<{}[<>[]}>{[]{[(<()>
+(((({<>}<{<{<>}{[]{[]{}
+[[<[([]))<([[{}[[()]]]
+[{[{({}]{}}([{[{{{}}([]
+{<[[]]>}<{[{[{[]{()[[[]
+[<(<(<(<{}))><([]([]()
+<{([([[(<>()){}]>(<<{{
+<{([{{}}[<[[[<>{}]]]>[]]", output: "288957" }
+                ]
+            }
+            {
+                "2021-10-1": day10part1,
+                tests: [
+                    { name: "0", input: "[({(<(())[]>[[{[]{<()<>>
+[(()[<>])]({[<{<<[]>>(
+{([(<{}[<>[]}>{[]{[(<()>
+(((({<>}<{<{<>}{[]{[]{}
+[[<[([]))<([[{}[[()]]]
+[{[{({}]{}}([{[{{{}}([]
+{<[[]]>}<{[{[{[]{()[[[]
+[<(<(<(<{}))><([]([]()
+<{([([[(<>()){}]>(<<{{
+<{([{{}}[<[[[<>{}]]]>[]]", output: "26397" }
+                ]
+            }
+            {
                 "2021-9-2": day9part2,
                 tests: [
                     { name: "0", input: "2199943210
@@ -198,6 +228,84 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
             }
         ]
     }
+}
+
+fn day10part2(input: &str) -> u64 {
+    let mut scores = Vec::new();
+    for line in input.lines() {
+        let mut stack = Vec::new();
+        let mut is_invalid = false;
+        for c in line.chars() {
+            match c {
+                '(' | '[' | '{' | '<' => stack.push(c),
+                ')' | ']' | '}' | '>' => {
+                    if stack.pop().unwrap() != flip(c) {
+                        is_invalid = true;
+                    }
+                }
+                _ => unreachable!(),
+            }
+        }
+        if !is_invalid {
+            let mut total = 0u64;
+            for c in stack.iter().rev() {
+                total = match c {
+                    '(' => total * 5 + 1,
+                    '[' => total * 5 + 2,
+                    '{' => total * 5 + 3,
+                    '<' => total * 5 + 4,
+                    _ => unreachable!(),
+                };
+            }
+            scores.push(total);
+        }
+    }
+    scores.sort_unstable();
+    scores[scores.len() / 2]
+}
+
+fn flip(c: char) -> char {
+    match c {
+        '(' => ')',
+        '[' => ']',
+        '{' => '}',
+        '<' => '>',
+        ')' => '(',
+        ']' => '[',
+        '}' => '{',
+        '>' => '<',
+        _ => panic!(),
+    }
+}
+fn score(c: char) -> u32 {
+    match c {
+        ')' => 3,
+        ']' => 57,
+        '}' => 1197,
+        '>' => 25137,
+        _ => panic!(),
+    }
+}
+
+fn day10part1(input: &str) -> u32 {
+    let mut stack = Vec::new();
+    let mut total = 0;
+    for line in input.lines() {
+        for c in line.chars() {
+            match c {
+                '(' | '[' | '{' | '<' => {
+                    stack.push(c);
+                }
+                ')' | ']' | '}' | '>' => {
+                    if stack.pop().unwrap() != flip(c) {
+                        total += score(c);
+                    }
+                }
+                _ => unreachable!(),
+            }
+        }
+    }
+    total
 }
 
 fn day9part2(input: &str) -> usize {
