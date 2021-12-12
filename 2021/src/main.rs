@@ -1,3 +1,7 @@
+use std::{
+    borrow::Borrow,
+    collections::{BTreeMap, BTreeSet, HashSet},
+};
 /*
   the code in this file is not good.
   it was written as fast as possible and it will never be used again
@@ -8,6 +12,50 @@ fn main() {
         session_file: ".session"
         input_dir: "input"
         challenges: [
+            {
+                "2021-12-2": day12part2,
+                tests: [
+                    { name: "1", input: "start-A
+start-b
+A-c
+A-b
+b-d
+A-end
+b-end", output: "36" }
+                    { name: "1", input: "dc-end
+HN-start
+start-kj
+dc-start
+dc-HN
+LN-dc
+HN-end
+kj-sa
+kj-HN
+kj-dc", output: "103" }
+                ]
+            }
+            {
+                "2021-12-1": day12part1,
+                tests: [
+                    { name: "1", input: "start-A
+start-b
+A-c
+A-b
+b-d
+A-end
+b-end", output: "10" }
+                    { name: "1", input: "dc-end
+HN-start
+start-kj
+dc-start
+dc-HN
+LN-dc
+HN-end
+kj-sa
+kj-HN
+kj-dc", output: "19" }
+                ]
+            }
             {
                 "2021-11-2": day11part2,
                 tests: [
@@ -260,12 +308,98 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
     }
 }
 
+// some optimization because it was pretty slow originally
+struct OverlayBTreeMap<'a, K, V> {
+    parent: Option<&'a OverlayBTreeMap<'a, K, V>>,
+    map: BTreeMap<K, V>,
+}
+
+impl<'a, K, V> OverlayBTreeMap<'a, K, V> {
+    fn new(parent: Option<&'a OverlayBTreeMap<'a, K, V>>) -> Self {
+        Self {
+            parent,
+            map: BTreeMap::new(),
+        }
+    }
+
+    fn get<Q: ?Sized>(&self, key: &Q) -> Option<&V>
+    where
+        K: Borrow<Q> + Ord,
+        Q: Ord,
+    {
+        match self.map.get(key) {
+            Some(val) => Some(val),
+            None => self.parent.as_ref().map_or(None, |parent| parent.get(key)),
+        }
+    }
+}
+
+fn num_paths_from(
+    caves: &BTreeMap<String, BTreeSet<String>>,
+    visited: &OverlayBTreeMap<String, usize>,
+    start: &str,
+    visit_small_twice: bool,
+) -> usize {
+    let mut sum = 0;
+    let mut visited = OverlayBTreeMap::new(Some(visited));
+    if start.chars().all(|x| x.is_ascii_lowercase()) {
+        *visited.map.entry(start.to_owned()).or_default() += 1;
+    }
+    for choice in &caves[start] {
+        sum += match &**choice {
+            "start" => 0,
+            "end" => 1,
+            _ => match visited.get(choice) {
+                Some(&n) if n >= 2 => 0,
+                Some(&n) if n >= 1 && !visit_small_twice => 0,
+                Some(_) => num_paths_from(caves, &visited, choice, false),
+                None => num_paths_from(caves, &visited, choice, visit_small_twice),
+            },
+        }
+    }
+    sum
+}
+
+fn day12part2(input: &str) -> usize {
+    let mut caves = BTreeMap::<String, BTreeSet<String>>::new();
+    for line in input.lines() {
+        let (from, to) = line.split_once('-').unwrap();
+        caves
+            .entry(from.to_owned())
+            .or_default()
+            .insert(to.to_owned());
+        caves
+            .entry(to.to_owned())
+            .or_default()
+            .insert(from.to_owned());
+    }
+    num_paths_from(&caves, &OverlayBTreeMap::new(None), "start", true)
+}
+
+fn day12part1(input: &str) -> usize {
+    let mut caves = BTreeMap::<String, BTreeSet<String>>::new();
+    for line in input.lines() {
+        let (from, to) = line.split_once('-').unwrap();
+        caves
+            .entry(from.to_owned())
+            .or_default()
+            .insert(to.to_owned());
+        caves
+            .entry(to.to_owned())
+            .or_default()
+            .insert(from.to_owned());
+    }
+    eprintln!("{:?}", caves);
+    num_paths_from(&caves, &OverlayBTreeMap::new(None), "start", false)
+}
+
 struct Grid {
     data: Vec<u8>,
     width: usize,
     height: usize,
     flash_count: usize,
 }
+
 impl Grid {
     fn new(s: &str) -> Self {
         let mut data = Vec::new();
@@ -314,7 +448,7 @@ impl Grid {
         true
     }
 
-    fn inc(&mut self, flashed: &mut std::collections::HashSet<(i32, i32)>, x: i32, y: i32) {
+    fn inc(&mut self, flashed: &mut HashSet<(i32, i32)>, x: i32, y: i32) {
         if !self.is_valid_point(x, y) {
             return;
         }
@@ -336,7 +470,7 @@ impl Grid {
     }
 
     fn step(&mut self) {
-        let mut flashed = std::collections::HashSet::new();
+        let mut flashed = HashSet::new();
         for y in 0..self.height as i32 {
             for x in 0..self.width as i32 {
                 self.inc(&mut flashed, x, y);
@@ -458,7 +592,6 @@ fn day10part1(input: &str) -> u32 {
 }
 
 fn day9part2(input: &str) -> usize {
-    use std::collections::BTreeSet;
     let input = input
         .lines()
         .map(|x| {
