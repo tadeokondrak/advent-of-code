@@ -1,0 +1,343 @@
+year = 2019
+
+rustc = rustc
+rustflags = -C opt-level=0
+#rustc = clippy-driver
+#rustflags = -C opt-level=2 -C lto
+
+rule build
+  command = $rustc $rustflags $day.rs -o build/$day
+  description = Building day $day
+
+rule buildtest
+  command = $rustc $rustflags $day.rs --test -o test/$day
+  description = Building tests for day $day
+
+rule input
+  command = curl $
+    -H cookie:\ session=$$AOC_SESSION $
+    https://adventofcode.com/$year/day/$$(echo $day | sed 's/^0//')/input $
+    > input/$day $
+    2>/dev/null
+  description = Downloading input $day
+
+rule output
+  command = build/$day < input/$day > output/$day
+  description = Running solution $day
+
+rule run
+  command = cat output/$day
+  description = Day $day
+
+rule runtest
+  command = test/$day
+  description = Day $day tests
+
+build all: phony $
+  output/01 $
+  output/02 $
+  output/03 $
+  output/04 $
+  output/05 $
+  output/06 $
+  output/07 $
+  output/08
+#  output/09
+#  output/10
+#  output/11
+#  output/12
+#  output/13
+#  output/14
+#  output/15
+#  output/16
+#  output/17
+#  output/18
+#  output/19
+#  output/20
+#  output/21
+#  output/22
+#  output/23
+#  output/24
+#  output/25
+
+default all
+
+build intcode: runtest test/intcode
+  day = intcode
+build test/intcode: buildtest intcode.rs
+  day = intcode
+
+build 01: run output/01
+  day = 01
+build input/01: input
+  day = 01
+build build/01: build 01.rs
+  day = 01
+build test/01: buildtest 01.rs
+  day = 01
+build output/01: output input/01 build/01
+  day = 01
+
+build 02: run output/02
+  day = 02
+build input/02: input
+  day = 02
+build build/02: build 02.rs intcode.rs
+  day = 02
+build test/02: buildtest 02.rs intcode.rs
+  day = 02
+build output/02: output input/02 build/02
+  day = 02
+
+build 03: run output/03
+  day = 03
+build input/03: input
+  day = 03
+build build/03: build 03.rs
+  day = 03
+build test/03: buildtest 03.rs
+  day = 03
+build output/03: output input/03 build/03
+  day = 03
+
+build 04: run output/04
+  day = 04
+build input/04: input
+  day = 04
+build build/04: build 04.rs
+  day = 04
+build test/04: buildtest 04.rs
+  day = 04
+build output/04: output input/04 build/04
+  day = 04
+
+build 05: run output/05
+  day = 05
+build input/05: input
+  day = 05
+build build/05: build 05.rs intcode.rs
+  day = 05
+build test/05: buildtest 05.rs intcode.rs
+  day = 05
+build output/05: output input/05 build/05
+  day = 05
+
+build 06: run output/06
+  day = 06
+build input/06: input
+  day = 06
+build build/06: build 06.rs
+  day = 06
+build test/06: buildtest 06.rs
+  day = 06
+build output/06: output input/06 build/06
+  day = 06
+
+build 07: run output/07
+  day = 07
+build input/07: input
+  day = 07
+build build/07: build 07.rs intcode.rs
+  day = 07
+build test/07: buildtest 07.rs intcode.rs
+  day = 07
+build output/07: output input/07 build/07
+  day = 07
+
+build 08: run output/08
+  day = 08
+build input/08: input
+  day = 08
+build build/08: build 08.rs
+  day = 08
+build test/08: buildtest 08.rs
+  day = 08
+build output/08: output input/08 build/08
+  day = 08
+
+build 09: run output/09
+  day = 09
+build input/09: input
+  day = 09
+build build/09: build 09.rs intcode.rs
+  day = 09
+build test/09: buildtest 09.rs
+  day = 09
+build output/09: output input/09 build/09
+  day = 09
+
+build 10: run output/10
+  day = 10
+build input/10: input
+  day = 10
+build build/10: build 10.rs
+  day = 10
+build test/10: buildtest 10.rs
+  day = 10
+build output/10: output input/10 build/10
+  day = 10
+
+build 11: run output/11
+  day = 11
+build input/11: input
+  day = 11
+build build/11: build 11.rs
+  day = 11
+build test/11: buildtest 11.rs
+  day = 11
+build output/11: output input/11 build/11
+  day = 11
+
+build 12: run output/12
+  day = 12
+build input/12: input
+  day = 12
+build build/12: build 12.rs
+  day = 12
+build test/12: buildtest 12.rs
+  day = 12
+build output/12: output input/12 build/12
+  day = 12
+
+build 13: run output/13
+  day = 13
+build input/13: input
+  day = 13
+build build/13: build 13.rs
+  day = 13
+build test/13: buildtest 13.rs
+  day = 13
+build output/13: output input/13 build/13
+  day = 13
+
+build 14: run output/14
+  day = 14
+build input/14: input
+  day = 14
+build build/14: build 14.rs
+  day = 14
+build test/14: buildtest 14.rs
+  day = 14
+build output/14: output input/14 build/14
+  day = 14
+
+build 15: run output/15
+  day = 15
+build input/15: input
+  day = 15
+build build/15: build 15.rs
+  day = 15
+build test/15: buildtest 15.rs
+  day = 15
+build output/15: output input/15 build/15
+  day = 15
+
+build 16: run output/16
+  day = 16
+build input/16: input
+  day = 16
+build build/16: build 16.rs
+  day = 16
+build test/16: buildtest 16.rs
+  day = 16
+build output/16: output input/16 build/16
+  day = 16
+
+build 17: run output/17
+  day = 17
+build input/17: input
+  day = 17
+build build/17: build 17.rs
+  day = 17
+build test/17: buildtest 17.rs
+  day = 17
+build output/17: output input/17 build/17
+  day = 17
+
+build 18: run output/18
+  day = 18
+build input/18: input
+  day = 18
+build build/18: build 18.rs
+  day = 18
+build test/18: buildtest 18.rs
+  day = 18
+build output/18: output input/18 build/18
+  day = 18
+
+build 19: run output/19
+  day = 19
+build input/19: input
+  day = 19
+build build/19: build 19.rs
+  day = 19
+build test/19: buildtest 19.rs
+  day = 19
+build output/19: output input/19 build/19
+  day = 19
+
+build 20: run output/20
+  day = 20
+build input/20: input
+  day = 20
+build build/20: build 20.rs
+  day = 20
+build test/20: buildtest 20.rs
+  day = 20
+build output/20: output input/20 build/20
+  day = 20
+
+build 21: run output/21
+  day = 21
+build input/21: input
+  day = 21
+build build/21: build 21.rs
+  day = 21
+build test/21: buildtest 21.rs
+  day = 21
+build output/21: output input/21 build/21
+  day = 21
+
+build 22: run output/22
+  day = 22
+build input/22: input
+  day = 22
+build build/22: build 22.rs
+  day = 22
+build test/22: buildtest 22.rs
+  day = 22
+build output/22: output input/22 build/22
+  day = 22
+
+build 23: run output/23
+  day = 23
+build input/23: input
+  day = 23
+build build/23: build 23.rs
+  day = 23
+build test/23: buildtest 23.rs
+  day = 23
+build output/23: output input/23 build/23
+  day = 23
+
+build 24: run output/24
+  day = 24
+build input/24: input
+  day = 24
+build build/24: build 24.rs
+  day = 24
+build test/24: buildtest 24.rs
+  day = 24
+build output/24: output input/24 build/24
+  day = 24
+
+build 25: run output/25
+  day = 25
+build input/25: input
+  day = 25
+build build/25: build 25.rs
+  day = 25
+build test/25: buildtest 25.rs
+  day = 25
+build output/25: output input/25 build/25
+  day = 25
