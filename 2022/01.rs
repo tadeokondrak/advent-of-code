@@ -1,4 +1,7 @@
-use std::io::{self, Read};
+use std::{
+    collections::BinaryHeap,
+    io::{self, Read},
+};
 
 fn main() {
     let mut input = String::new();
@@ -8,28 +11,21 @@ fn main() {
 }
 
 fn part1(input: &str) -> i32 {
-    let mut elves = vec![0];
-    for line in input.lines() {
-        if line.trim().is_empty() {
-            elves.push(0);
-            continue;
-        }
-        *elves.last_mut().unwrap() += line.parse::<i32>().unwrap()
-    }
-    *elves.iter().max().unwrap()
+    input
+        .split("\n\n")
+        .map(|elf| elf.lines().map(|line| line.parse::<i32>().unwrap()).sum())
+        .max()
+        .unwrap()
 }
 
 fn part2(input: &str) -> i32 {
-    let mut elves = vec![0];
-    for line in input.lines() {
-        if line.trim().is_empty() {
-            elves.push(0);
-            continue;
-        }
-        *elves.last_mut().unwrap() += line.parse::<i32>().unwrap()
-    }
-    elves.sort_by(|a, b| b.cmp(a));
-    elves[0] + elves[1] + elves[2]
+    input
+        .split("\n\n")
+        .map(|elf| elf.lines().map(|line| line.parse::<i32>().unwrap()).sum())
+        .collect::<BinaryHeap<i32>>()
+        .iter()
+        .take(3)
+        .sum()
 }
 
 #[cfg(test)]
