@@ -1,0 +1,12 @@
+[package]
+name = "advent-of-code-2022"
+version = "0.0.0"
+edition = "2021"
+publish = false
+authors = ["Tadeo Kondrak <me@tadeo.ca>"]
+
+[dependencies]
+
+[[bin]]
+name = "01"
+path = "01.rs"
