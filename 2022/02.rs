@@ -7,9 +7,14 @@ fn main() {
     println!("Part 2: {}", part2(&input));
 }
 
+const LEFT_MOVES: &str = "ABC";
+const RIGHT_MOVES: &str = "XYZ";
+
+const ROCK: i32 = 1;
+const PAPER: i32 = 2;
+const SCISSORS: i32 = 3;
+
 fn part1(input: &str) -> i32 {
-    const LEFT_MOVES: &str = "ABC";
-    const RIGHT_MOVES: &str = "XYZ";
     let mut score = 0;
     for line in input.lines() {
         let (left, right) = line.split_once(' ').unwrap();
@@ -18,9 +23,9 @@ fn part1(input: &str) -> i32 {
         score += right
             + match (left, right) {
                 _ if left == right => 3,
-                (1, 2) => 6,
-                (2, 3) => 6,
-                (3, 1) => 6,
+                (ROCK, PAPER) => 6,
+                (PAPER, SCISSORS) => 6,
+                (SCISSORS, ROCK) => 6,
                 _ => 0,
             };
     }
@@ -28,27 +33,26 @@ fn part1(input: &str) -> i32 {
 }
 
 fn part2(input: &str) -> i32 {
-    const LEFT_MOVES: &str = "ABC";
     let mut score = 0;
     for line in input.lines() {
         let (left, right) = line.split_once(' ').unwrap();
         let left = i32::try_from(LEFT_MOVES.find(left).unwrap() + 1).unwrap();
         let right = match (left, right) {
-            (1, "X") => 3,
-            (2, "X") => 1,
-            (3, "X") => 2,
-            (1, "Z") => 2,
-            (2, "Z") => 3,
-            (3, "Z") => 1,
+            (ROCK, "X") => SCISSORS,
+            (PAPER, "X") => ROCK,
+            (SCISSORS, "X") => PAPER,
+            (ROCK, "Z") => PAPER,
+            (PAPER, "Z") => SCISSORS,
+            (SCISSORS, "Z") => ROCK,
             (x, "Y") => x,
             _ => panic!(),
         };
         score += right
             + match (left, right) {
                 _ if left == right => 3,
-                (1, 2) => 6,
-                (2, 3) => 6,
-                (3, 1) => 6,
+                (ROCK, PAPER) => 6,
+                (PAPER, SCISSORS) => 6,
+                (SCISSORS, ROCK) => 6,
                 _ => 0,
             };
     }
