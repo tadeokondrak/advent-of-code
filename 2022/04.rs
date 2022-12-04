@@ -1,5 +1,7 @@
 use std::io::{self, Read};
 
+use sscanf::sscanf;
+
 fn main() {
     let mut input = String::new();
     io::stdin().read_to_string(&mut input).unwrap();
@@ -10,15 +12,8 @@ fn main() {
 fn part1(input: &str) -> i32 {
     let mut count = 0;
     for line in input.lines() {
-        let (left_s, right_s) = line.split_once(',').unwrap();
-        let (l_start, l_end) = left_s.split_once('-').unwrap();
-        let (r_start, r_end) = right_s.split_once('-').unwrap();
-        let (l_start, l_end, r_start, r_end) = (
-            l_start.parse::<i32>().unwrap(),
-            l_end.parse::<i32>().unwrap(),
-            r_start.parse::<i32>().unwrap(),
-            r_end.parse::<i32>().unwrap(),
-        );
+        let (l_start, l_end, r_start, r_end) =
+            sscanf!(line.trim(), "{i32},{i32}-{i32},{i32}").unwrap();
         let left = l_start..=l_end;
         let right = r_start..=r_end;
         if (left.contains(right.start()) && left.contains(right.end()))
@@ -33,15 +28,8 @@ fn part1(input: &str) -> i32 {
 fn part2(input: &str) -> i32 {
     let mut count = 0;
     for line in input.lines() {
-        let (left_s, right_s) = line.split_once(',').unwrap();
-        let (l_start, l_end) = left_s.split_once('-').unwrap();
-        let (r_start, r_end) = right_s.split_once('-').unwrap();
-        let (l_start, l_end, r_start, r_end) = (
-            l_start.parse::<i32>().unwrap(),
-            l_end.parse::<i32>().unwrap(),
-            r_start.parse::<i32>().unwrap(),
-            r_end.parse::<i32>().unwrap(),
-        );
+        let (l_start, l_end, r_start, r_end) =
+            sscanf!(line.trim(), "{i32},{i32}-{i32},{i32}").unwrap();
         let left = l_start..=l_end;
         let right = r_start..=r_end;
         if left.contains(right.start())
