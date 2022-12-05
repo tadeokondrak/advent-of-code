@@ -34,7 +34,7 @@ fn part1(input: &str) -> String {
     }
     stacks
         .iter()
-        .map(|stack| stack[stack.len() - 1])
+        .map(|stack| stack.back().unwrap())
         .collect::<String>()
 }
 
@@ -62,7 +62,7 @@ fn part2(input: &str) -> String {
     }
     stacks
         .iter()
-        .map(|stack| stack[stack.len() - 1])
+        .map(|stack| stack.back().unwrap())
         .collect::<String>()
 }
 
