@@ -31,14 +31,12 @@ fn process(input: &str) -> HashMap<String, u64> {
         } else {
             match last_cmd {
                 Some("ls") => {
-                    let (lhs, name) = sscanf::sscanf!(line, "{String} {String}").unwrap();
+                    let (lhs, _) = sscanf::sscanf!(line, "{String} {String}").unwrap();
                     if lhs != "dir" {
-                        path.push(name);
-                        for i in 0..path.len() {
+                        for i in 0..=path.len() {
                             let cur_path = path[..i].join("/");
                             *sizes.entry(cur_path).or_default() += lhs.parse::<u64>().unwrap();
                         }
-                        path.pop().unwrap();
                     }
                 }
                 _ => panic!("unknown: {:#?} {:#?}", line, last_cmd),
