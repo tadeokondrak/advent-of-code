@@ -12,34 +12,25 @@ fn main() {
 
 fn process(input: &str) -> HashMap<String, u64> {
     let mut path = Vec::new();
-    let mut sizes: HashMap<String, u64> = HashMap::new();
-    let mut last_cmd = None;
-    for line in input.lines() {
-        if line.trim().is_empty() {
-            continue;
-        }
+    let mut sizes = HashMap::new();
+    for line in input.lines().filter(|line| !line.trim().is_empty()) {
         if line.starts_with("$ ") {
-            let args = line[2..].split(" ").collect::<Vec<_>>();
-            last_cmd = None;
-            match (args[0].clone(), args.get(1)) {
-                ("cd", Some(&"/")) => path.clear(),
-                ("cd", Some(&"..")) => _ = path.pop(),
-                ("cd", Some(&new_path)) => _ = path.push(new_path.to_owned()),
-                ("ls", None) => last_cmd = Some("ls"),
+            let args: Vec<&str> = line[2..].split(" ").collect();
+            match (args[0].clone(), &args[1..]) {
+                ("cd", ["/"]) => path.clear(),
+                ("cd", [".."]) => _ = path.pop(),
+                ("cd", [dir]) => _ = path.push(dir.to_owned()),
+                ("ls", []) => {}
                 _ => panic!("unknown: {:#?}", args),
             }
         } else {
-            match last_cmd {
-                Some("ls") => {
-                    let (lhs, _) = sscanf::sscanf!(line, "{String} {String}").unwrap();
-                    if lhs != "dir" {
-                        for i in 0..=path.len() {
-                            let cur_path = path[..i].join("/");
-                            *sizes.entry(cur_path).or_default() += lhs.parse::<u64>().unwrap();
-                        }
-                    }
+            let (lhs, _) = sscanf::sscanf!(line, "{String} {String}").unwrap();
+            if lhs != "dir" {
+                for i in 0..=path.len() {
+                    let cur_path = path[..i].join("/");
+                    let size = lhs.parse::<u64>().unwrap();
+                    *sizes.entry(cur_path).or_default() += size;
                 }
-                _ => panic!("unknown: {:#?} {:#?}", line, last_cmd),
             }
         }
     }
