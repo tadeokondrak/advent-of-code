@@ -97,7 +97,6 @@ fn solve(input: &str, len: usize) -> usize {
     visited.len()
 }
 
-#[cfg(test)]
 fn part1(input: &str) -> usize {
     solve(input, 2)
 }
@@ -106,6 +105,7 @@ fn part2(input: &str) -> usize {
     solve(input, 10)
 }
 
+#[cfg(test)]
 mod test {
     use super::*;
     const SIMPLE_INPUT: &str = "R 4
