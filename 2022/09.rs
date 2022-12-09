@@ -72,50 +72,24 @@ fn find_move(leader: Point, follower: Point) -> Point {
     }
 }
 
-fn part1(input: &str) -> usize {
-    let mut head = Point::ZERO;
-    let mut tail = Point::ZERO;
-    let mut visited = HashSet::new();
-    visited.insert(tail);
-    for line in input.lines() {
-        let (dir, count) = line.split_once(" ").unwrap();
-        let count = count.parse::<i32>().unwrap();
-        for _ in 0..count {
-            head += match dir {
-                "L" => point(-1, 0),
-                "R" => point(1, 0),
-                "U" => point(0, 1),
-                "D" => point(0, -1),
-                _ => panic!(),
-            };
-            tail += find_move(head, tail);
-            visited.insert(tail);
-        }
-    }
-    visited.len()
-}
-fn part2(input: &str) -> usize {
-    let mut head = Point::ZERO;
-    let mut rope = [Point::ZERO; 9];
+fn solve(input: &str, len: usize) -> usize {
+    let mut rope = vec![Point::ZERO; len];
     let mut visited = HashSet::new();
     visited.insert(*rope.last().unwrap());
     for line in input.lines() {
         let (dir, count) = line.split_once(" ").unwrap();
         let count = count.parse::<i32>().unwrap();
         for _ in 0..count {
-            head += match dir {
+            rope[0] += match dir {
                 "L" => point(-1, 0),
                 "R" => point(1, 0),
                 "U" => point(0, 1),
                 "D" => point(0, -1),
                 _ => panic!(),
             };
-            for i in 0..9 {
-                let leader = match i {
-                    0 => head,
-                    _ => rope[i - 1],
-                };
-                rope[i] += find_move(leader, rope[i]);
+            for i in 1..len {
+                let m = find_move(rope[i - 1], rope[i]);
+                rope[i] += m;
             }
             visited.insert(*rope.last().unwrap());
         }
@@ -124,6 +98,14 @@ fn part2(input: &str) -> usize {
 }
 
 #[cfg(test)]
+fn part1(input: &str) -> usize {
+    solve(input, 2)
+}
+
+fn part2(input: &str) -> usize {
+    solve(input, 10)
+}
+
 mod test {
     use super::*;
     const SIMPLE_INPUT: &str = "R 4
