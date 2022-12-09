@@ -52,7 +52,7 @@ impl std::ops::AddAssign<Point> for Point {
     }
 }
 
-fn do_move(leader: Point, follower: Point) -> Point {
+fn find_move(leader: Point, follower: Point) -> Point {
     match leader - follower {
         Point {
             x: x @ (-2 | 2),
@@ -88,7 +88,7 @@ fn part1(input: &str) -> usize {
                 "D" => point(0, -1),
                 _ => panic!(),
             };
-            tail += do_move(head, tail);
+            tail += find_move(head, tail);
             visited.insert(tail);
         }
     }
@@ -115,7 +115,7 @@ fn part2(input: &str) -> usize {
                     0 => head,
                     _ => rope[i - 1],
                 };
-                rope[i] += do_move(leader, rope[i]);
+                rope[i] += find_move(leader, rope[i]);
             }
             visited.insert(*rope.last().unwrap());
         }
