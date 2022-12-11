@@ -10,44 +10,36 @@ fn main() {
     println!("Part 2: {}", part2(&input));
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
 enum Operation {
-    Old,
-    Const(i64),
-    Add(Box<Operation>, Box<Operation>),
-    Mul(Box<Operation>, Box<Operation>),
+    Square,
+    Add(i64),
+    Mul(i64),
 }
 
 impl Operation {
     fn parse(s: &str) -> Operation {
         let mut tokens = s.split(" ");
-        let lhs = match tokens.next().unwrap() {
-            "old" => Operation::Old,
-            other => Operation::Const(other.parse().unwrap()),
-        };
-        let op = match tokens.next().unwrap() {
-            "+" => Operation::Add,
-            "*" => Operation::Mul,
+        match (
+            tokens.next().unwrap(),
+            tokens.next().unwrap(),
+            tokens.next().unwrap(),
+        ) {
+            ("old", "*", "old") => Operation::Square,
+            ("old", "+", other) => Operation::Add(other.parse().unwrap()),
+            ("old", "*", other) => Operation::Mul(other.parse().unwrap()),
             _ => panic!(),
-        };
-        let rhs = match tokens.next().unwrap() {
-            "old" => Operation::Old,
-            other => Operation::Const(other.parse().unwrap()),
-        };
-        op(lhs.into(), rhs.into())
+        }
     }
 
     fn eval(&self, old: i64) -> i64 {
         match self {
-            Operation::Old => old,
-            Operation::Const(x) => *x,
-            Operation::Add(lhs, rhs) => lhs.eval(old) + rhs.eval(old),
-            Operation::Mul(lhs, rhs) => lhs.eval(old) * rhs.eval(old),
+            Operation::Square => old * old,
+            Operation::Add(rhs) => old + rhs,
+            Operation::Mul(rhs) => old * rhs,
         }
     }
 }
 
-#[derive(Debug)]
 struct Monkey {
     worry_levels: Vec<i64>,
     operation: Operation,
@@ -60,34 +52,24 @@ struct Monkey {
 impl Monkey {
     fn parse(s: &str) -> Monkey {
         let mut lines = s.lines();
-        _ = lines.next().unwrap();
-        let worry_levels =
-            sscanf::sscanf!(lines.next().unwrap().trim(), "Starting items: {String}")
-                .unwrap()
+        // Skip first line
+        lines.next().unwrap();
+        let mut line_without_prefix =
+            |prefix: &str| lines.next().unwrap().strip_prefix(prefix).unwrap();
+        let worry_levels = line_without_prefix("  Starting items: ");
+        let operation = line_without_prefix("  Operation: new = ");
+        let test_divisible_by = line_without_prefix("  Test: divisible by ");
+        let throw_to_monkey_true = line_without_prefix("    If true: throw to monkey ");
+        let throw_to_monkey_false = line_without_prefix("    If false: throw to monkey ");
+        Monkey {
+            worry_levels: worry_levels
                 .split(", ")
                 .map(|num| num.parse().unwrap())
-                .collect();
-        let operation = Operation::parse(
-            &sscanf::sscanf!(lines.next().unwrap().trim(), "Operation: new = {String}").unwrap(),
-        );
-        let test_divisible_by =
-            sscanf::sscanf!(lines.next().unwrap().trim(), "Test: divisible by {i64}").unwrap();
-        let throw_to_monkey_true = sscanf::sscanf!(
-            lines.next().unwrap().trim(),
-            "If true: throw to monkey {usize}"
-        )
-        .unwrap();
-        let throw_to_monkey_false = sscanf::sscanf!(
-            lines.next().unwrap().trim(),
-            "If false: throw to monkey {usize}"
-        )
-        .unwrap();
-        Monkey {
-            worry_levels,
-            operation,
-            test_divisible_by,
-            throw_to_monkey_true,
-            throw_to_monkey_false,
+                .collect(),
+            operation: Operation::parse(&operation),
+            test_divisible_by: test_divisible_by.parse().unwrap(),
+            throw_to_monkey_true: throw_to_monkey_true.parse().unwrap(),
+            throw_to_monkey_false: throw_to_monkey_false.parse().unwrap(),
             inspect_count: 0,
         }
     }
@@ -98,11 +80,11 @@ fn part1(input: &str) -> i64 {
     for _ in 1..=20 {
         for i in 0..monkeys.len() {
             let mut monkey = &mut monkeys[i];
-            let mut new_positions = Vec::new();
+            let mut new_indices = Vec::new();
             for item in monkey.worry_levels.iter_mut() {
                 *item = monkey.operation.eval(*item);
                 *item /= 3;
-                new_positions.push(if *item % monkey.test_divisible_by == 0 {
+                new_indices.push(if *item % monkey.test_divisible_by == 0 {
                     monkey.throw_to_monkey_true
                 } else {
                     monkey.throw_to_monkey_false
@@ -110,7 +92,7 @@ fn part1(input: &str) -> i64 {
             }
             monkey.inspect_count += monkey.worry_levels.len() as i64;
             let worry_levels = mem::take(&mut monkeys[i].worry_levels);
-            for (level, to_monkey_index) in worry_levels.into_iter().zip(new_positions) {
+            for (level, to_monkey_index) in worry_levels.into_iter().zip(new_indices) {
                 monkeys[to_monkey_index].worry_levels.push(level);
             }
         }
@@ -128,10 +110,10 @@ fn part2(input: &str) -> i64 {
     for _ in 1..=10000 {
         for i in 0..monkeys.len() {
             let mut monkey = &mut monkeys[i];
-            let mut actions = Vec::new();
+            let mut new_indices = Vec::new();
             for item in monkey.worry_levels.iter_mut() {
                 *item = monkey.operation.eval(*item);
-                actions.push(if *item % monkey.test_divisible_by == 0 {
+                new_indices.push(if *item % monkey.test_divisible_by == 0 {
                     monkey.throw_to_monkey_true
                 } else {
                     monkey.throw_to_monkey_false
@@ -139,7 +121,7 @@ fn part2(input: &str) -> i64 {
             }
             monkey.inspect_count += monkey.worry_levels.len() as i64;
             let worry_levels = mem::take(&mut monkeys[i].worry_levels);
-            for (level, to_monkey_index) in worry_levels.into_iter().zip(actions) {
+            for (level, to_monkey_index) in worry_levels.into_iter().zip(new_indices) {
                 monkeys[to_monkey_index].worry_levels.push(level % lcm);
             }
         }
@@ -178,15 +160,6 @@ Monkey 3:
   Test: divisible by 17
     If true: throw to monkey 0
     If false: throw to monkey 1";
-
-    #[test]
-    fn test_operation() {
-        assert_eq!(
-            Operation::parse("old * 19"),
-            Operation::Mul(Operation::Old.into(), Operation::Const(19).into())
-        );
-        assert_eq!(Operation::parse("old * 19").eval(2), 19 * 2);
-    }
 
     #[test]
     fn test_part1() {
