@@ -103,7 +103,7 @@ fn part1(input: &str) -> i64 {
 
 fn part2(input: &str) -> i64 {
     let mut monkeys = input.split("\n\n").map(Monkey::parse).collect::<Vec<_>>();
-    let lcm = monkeys
+    let common_multiple = monkeys
         .iter()
         .map(|monkey| monkey.test_divisible_by)
         .product::<i64>();
@@ -122,7 +122,9 @@ fn part2(input: &str) -> i64 {
             monkey.inspect_count += monkey.worry_levels.len() as i64;
             let worry_levels = mem::take(&mut monkeys[i].worry_levels);
             for (level, to_monkey_index) in worry_levels.into_iter().zip(new_indices) {
-                monkeys[to_monkey_index].worry_levels.push(level % lcm);
+                monkeys[to_monkey_index]
+                    .worry_levels
+                    .push(level % common_multiple);
             }
         }
     }
