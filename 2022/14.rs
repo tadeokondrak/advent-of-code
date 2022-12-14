@@ -1,3 +1,6 @@
+mod util;
+use util::{point, Point};
+
 use std::{
     collections::HashMap,
     io::{self, Read},
@@ -8,37 +11,6 @@ fn main() {
     io::stdin().read_to_string(&mut input).unwrap();
     println!("Part 1: {}", part1(&input));
     println!("Part 2: {}", part2(&input));
-}
-#[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq)]
-struct Point {
-    x: i32,
-    y: i32,
-}
-
-fn point(x: i32, y: i32) -> Point {
-    Point { x, y }
-}
-
-impl std::ops::Add<Point> for Point {
-    type Output = Self;
-
-    fn add(self, rhs: Point) -> Self::Output {
-        Point {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
-        }
-    }
-}
-
-impl std::ops::Sub<Point> for Point {
-    type Output = Self;
-
-    fn sub(self, rhs: Point) -> Self::Output {
-        Point {
-            x: self.x - rhs.x,
-            y: self.y - rhs.y,
-        }
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
