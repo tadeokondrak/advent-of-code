@@ -13,7 +13,7 @@ fn part1(input: &str) -> i32 {
     let mut count = 0;
     for line in input.lines() {
         let (l_start, l_end, r_start, r_end) =
-            sscanf!(line.trim(), "{i32},{i32}-{i32},{i32}").unwrap();
+            sscanf!(line.trim(), "{i32}-{i32},{i32}-{i32}").unwrap();
         let left = l_start..=l_end;
         let right = r_start..=r_end;
         if (left.contains(right.start()) && left.contains(right.end()))
@@ -29,7 +29,7 @@ fn part2(input: &str) -> i32 {
     let mut count = 0;
     for line in input.lines() {
         let (l_start, l_end, r_start, r_end) =
-            sscanf!(line.trim(), "{i32},{i32}-{i32},{i32}").unwrap();
+            sscanf!(line.trim(), "{i32}-{i32},{i32}-{i32}").unwrap();
         let left = l_start..=l_end;
         let right = r_start..=r_end;
         if left.contains(right.start())
