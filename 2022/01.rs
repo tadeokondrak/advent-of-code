@@ -1,5 +1,5 @@
 use std::{
-    collections::BinaryHeap,
+    cmp::Reverse,
     io::{self, Read},
 };
 
@@ -19,13 +19,12 @@ fn part1(input: &str) -> i32 {
 }
 
 fn part2(input: &str) -> i32 {
-    input
+    let mut lines = input
         .split("\n\n")
         .map(|elf| elf.lines().map(|line| line.parse::<i32>().unwrap()).sum())
-        .collect::<BinaryHeap<i32>>()
-        .iter()
-        .take(3)
-        .sum()
+        .collect::<Vec<i32>>();
+    lines.sort_by_key(|&n| Reverse(n));
+    lines.iter().take(3).sum()
 }
 
 #[cfg(test)]
