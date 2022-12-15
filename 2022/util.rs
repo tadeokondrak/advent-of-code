@@ -1,3 +1,6 @@
+// false positives since it's a mod of multiple files
+#![allow(dead_code)]
+
 #[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq)]
 pub struct Point {
     pub x: i32,
@@ -33,6 +36,7 @@ impl std::ops::Sub<Point> for Point {
         }
     }
 }
+
 impl std::ops::AddAssign<Point> for Point {
     fn add_assign(&mut self, rhs: Point) {
         *self = *self + rhs;
