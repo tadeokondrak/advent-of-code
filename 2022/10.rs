@@ -43,6 +43,10 @@ fn part2(input: &str) -> String {
     let mut lines = input.lines();
     let mut grid = [false; 40 * 6];
     loop {
+        let crtpos = cycle - 1;
+        if [x - 1, x, x + 1].contains(&(crtpos % 40)) {
+            grid[crtpos as usize] = true;
+        }
         if let Some(num) = pending.take() {
             x += num;
         } else if let Some(line) = lines.next() {
@@ -56,11 +60,6 @@ fn part2(input: &str) -> String {
             }
         } else {
             break;
-        }
-        if cycle < grid.len() {
-            grid[cycle] = (cycle as i32 % 40) == x
-                || (cycle as i32 % 40) == x - 1
-                || (cycle as i32 % 40) == x + 1;
         }
         cycle += 1;
     }
