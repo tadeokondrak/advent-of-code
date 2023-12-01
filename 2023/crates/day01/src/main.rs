@@ -16,8 +16,8 @@ fn find_digit_word(s: &str) -> Option<u32> {
         "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
     ]
     .iter()
-    .enumerate()
-    .find_map(|(i, word)| s.starts_with(word).then_some(i as u32 + 1))
+    .position(|word| s.starts_with(word))
+    .map(|i| i as u32 + 1)
 }
 
 fn find_digit(s: &str) -> Option<u32> {
