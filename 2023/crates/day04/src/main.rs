@@ -48,24 +48,27 @@ fn solve_p1(input: &str) -> u32 {
         .sum()
 }
 
-// slow but works
 fn solve_p2(input: &str) -> u32 {
     let cards = parse(input);
-    let mut count = 0;
-    let mut queue = Vec::new();
-    queue.extend(0..cards.len());
-    while let Some(card_index) = queue.pop() {
+    let mut total_count = 0;
+    let mut counts = vec![1; cards.len()];
+    loop {
+        let card_index = match counts.iter().position(|&count| count > 0) {
+            Some(i) => i,
+            None => break,
+        };
         let (winning, ours) = &cards[card_index];
         for (i, _) in winning
             .iter()
             .filter(|winning| ours.binary_search(&winning).is_ok())
             .enumerate()
         {
-            queue.push(card_index + 1 + i);
+            counts[card_index + 1 + i] += counts[card_index];
         }
-        count += 1;
+        total_count += counts[card_index];
+        counts[card_index] = 0;
     }
-    count
+    total_count
 }
 
 #[cfg(test)]
