@@ -7,7 +7,15 @@ fn main() {
     eprintln!("p2: {}", solve_p2(&input));
 }
 
-fn solve_p1(input: &str) -> u32 {
+fn parse(input: &str) -> Vec<(Vec<u32>, Vec<u32>)> {
+    fn parse_nums(s: &str) -> Vec<u32> {
+        s.split(" ")
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
+            .map(|s| s.parse::<u32>().unwrap())
+            .collect::<Vec<_>>()
+    }
+
     input
         .lines()
         .map(|line| line.trim())
@@ -15,25 +23,24 @@ fn solve_p1(input: &str) -> u32 {
         .map(|line| {
             let (_, line) = line.split_once(": ").unwrap();
             let (winning, ours) = line.split_once(" | ").unwrap();
-            let winning = winning
-                .split(" ")
-                .map(|s| s.trim())
-                .filter(|s| !s.is_empty())
-                .map(|s| s.parse::<u32>().unwrap())
-                .collect::<Vec<_>>();
-            let mut ours = ours
-                .split(" ")
-                .map(|s| s.trim())
-                .filter(|s| !s.is_empty())
-                .map(|s| s.parse::<u32>().unwrap())
-                .collect::<Vec<_>>();
+            let winning = parse_nums(winning);
+            let mut ours = parse_nums(ours);
             ours.sort();
-            let matching_count = winning
+            (winning, ours)
+        })
+        .collect::<Vec<_>>()
+}
+
+fn solve_p1(input: &str) -> u32 {
+    parse(input)
+        .iter()
+        .map(|(winning, ours)| {
+            let matching = winning
                 .iter()
                 .filter(|winning| ours.binary_search(&winning).is_ok())
                 .count() as u32;
-            if matching_count > 0 {
-                2u32.pow(matching_count - 1)
+            if matching > 0 {
+                2u32.pow(matching - 1)
             } else {
                 0
             }
@@ -41,39 +48,15 @@ fn solve_p1(input: &str) -> u32 {
         .sum()
 }
 
+// slow but works
 fn solve_p2(input: &str) -> u32 {
-    let mut cards = Vec::new();
-    let mut ourses = Vec::new();
-    for line in input
-        .lines()
-        .map(|line| line.trim())
-        .filter(|line| !line.is_empty())
-    {
-        let (_, line) = line.split_once(": ").unwrap();
-        let (winning, ours) = line.split_once(" | ").unwrap();
-        let winning = winning
-            .split(" ")
-            .map(|s| s.trim())
-            .filter(|s| !s.is_empty())
-            .map(|s| s.parse::<u32>().unwrap())
-            .collect::<Vec<_>>();
-        let mut ours = ours
-            .split(" ")
-            .map(|s| s.trim())
-            .filter(|s| !s.is_empty())
-            .map(|s| s.parse::<u32>().unwrap())
-            .collect::<Vec<_>>();
-        ours.sort();
-        cards.push(winning);
-        ourses.push(ours);
-    }
+    let cards = parse(input);
     let mut count = 0;
     let mut queue = Vec::new();
     queue.extend(0..cards.len());
     while let Some(card_index) = queue.pop() {
-        let card = &cards[card_index];
-        let ours = &ourses[card_index];
-        for (i, _) in card
+        let (winning, ours) = &cards[card_index];
+        for (i, _) in winning
             .iter()
             .filter(|winning| ours.binary_search(&winning).is_ok())
             .enumerate()
@@ -84,6 +67,7 @@ fn solve_p2(input: &str) -> u32 {
     }
     count
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
