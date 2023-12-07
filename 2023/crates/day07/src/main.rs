@@ -33,22 +33,6 @@ enum Card {
     CardA,
 }
 
-const ALL_CARDS: [Card; 13] = [
-    Card::Card2,
-    Card::Card3,
-    Card::Card4,
-    Card::Card5,
-    Card::Card6,
-    Card::Card7,
-    Card::Card8,
-    Card::Card9,
-    Card::CardT,
-    Card::CardJ,
-    Card::CardQ,
-    Card::CardK,
-    Card::CardA,
-];
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 enum Hand {
     HighCard,
@@ -62,7 +46,7 @@ enum Hand {
 
 fn score_hand(cards: [Card; 5], joker_status: JokerStatus) -> Hand {
     fn check_n_of_a_kind(cards: [Card; 5], n: usize, joker_status: JokerStatus) -> bool {
-        ALL_CARDS.iter().copied().any(|ref_card| {
+        cards.into_iter().any(|ref_card| {
             cards
                 .iter()
                 .copied()
@@ -76,27 +60,30 @@ fn score_hand(cards: [Card; 5], joker_status: JokerStatus) -> Hand {
     }
 
     fn check_n_of_two_kinds(cards: [Card; 5], n: usize, joker_status: JokerStatus) -> bool {
-        for card_a in cards {
-            let card_a_count = cards.iter().copied().filter(|&card| card == card_a).count();
-            for card_b in cards {
-                let card_b_count = cards.iter().copied().filter(|&card| card == card_b).count();
-                if card_a == card_b
-                    || (joker_status == JokerStatus::Enabled
-                        && (card_a == Card::CardJ || card_b == Card::CardJ))
-                {
-                    continue;
-                }
-                let joker_count = cards
+        let joker_count = cards
+            .iter()
+            .copied()
+            .filter(|&card| joker_status == JokerStatus::Enabled && card == Card::CardJ)
+            .count();
+        cards
+            .iter()
+            .copied()
+            .filter(|&card_a| joker_status == JokerStatus::Disabled || card_a != Card::CardJ)
+            .any(|card_a| {
+                let card_a_count = cards.iter().copied().filter(|&card| card == card_a).count();
+                cards
                     .iter()
                     .copied()
-                    .filter(|&card| joker_status == JokerStatus::Enabled && card == Card::CardJ)
-                    .count();
-                if card_a_count + card_b_count + joker_count == n {
-                    return true;
-                }
-            }
-        }
-        false
+                    .filter(|&card_b| {
+                        card_b != card_a
+                            && (joker_status == JokerStatus::Disabled || card_b != Card::CardJ)
+                    })
+                    .any(|card_b| {
+                        let card_b_count =
+                            cards.iter().copied().filter(|&card| card == card_b).count();
+                        card_a_count + card_b_count + joker_count == n
+                    })
+            })
     }
 
     if check_n_of_a_kind(cards, 5, joker_status) {
@@ -127,29 +114,24 @@ fn score_hand(cards: [Card; 5], joker_status: JokerStatus) -> Hand {
 }
 
 fn parse_hand(hand: &str) -> [Card; 5] {
-    hand.chars()
-        .map(|c| {
-            match c {
-                'A' => Some(Card::CardA),
-                'K' => Some(Card::CardK),
-                'Q' => Some(Card::CardQ),
-                'J' => Some(Card::CardJ),
-                'T' => Some(Card::CardT),
-                '9' => Some(Card::Card9),
-                '8' => Some(Card::Card8),
-                '7' => Some(Card::Card7),
-                '6' => Some(Card::Card6),
-                '5' => Some(Card::Card5),
-                '4' => Some(Card::Card4),
-                '3' => Some(Card::Card3),
-                '2' => Some(Card::Card2),
-                _ => None,
-            }
-            .unwrap()
-        })
-        .collect::<Vec<_>>()
-        .try_into()
+    <[u8; 5]>::try_from(hand.as_bytes())
         .unwrap()
+        .map(|c| match c {
+            b'A' => Card::CardA,
+            b'K' => Card::CardK,
+            b'Q' => Card::CardQ,
+            b'J' => Card::CardJ,
+            b'T' => Card::CardT,
+            b'9' => Card::Card9,
+            b'8' => Card::Card8,
+            b'7' => Card::Card7,
+            b'6' => Card::Card6,
+            b'5' => Card::Card5,
+            b'4' => Card::Card4,
+            b'3' => Card::Card3,
+            b'2' => Card::Card2,
+            _ => panic!(),
+        })
 }
 
 fn solve(input: &str, joker_status: JokerStatus) -> u32 {
