@@ -4,11 +4,17 @@ use std::{
     io::{stdin, Read},
 };
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum JokerStatus {
+    Disabled,
+    Enabled,
+}
+
 fn main() {
     let mut input = String::new();
     stdin().read_to_string(&mut input).unwrap();
-    eprintln!("p1: {}", solve(&input, score_hand_p1, Card::cmp_p1));
-    eprintln!("p2: {}", solve(&input, score_hand_p2, Card::cmp_p2));
+    eprintln!("p1: {}", solve(&input, JokerStatus::Disabled));
+    eprintln!("p2: {}", solve(&input, JokerStatus::Enabled));
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -44,40 +50,6 @@ const ALL_CARDS: [Card; 13] = [
     Card::CardA,
 ];
 
-impl Card {
-    fn from_char(c: char) -> Option<Card> {
-        match c {
-            'A' => Some(Card::CardA),
-            'K' => Some(Card::CardK),
-            'Q' => Some(Card::CardQ),
-            'J' => Some(Card::CardJ),
-            'T' => Some(Card::CardT),
-            '9' => Some(Card::Card9),
-            '8' => Some(Card::Card8),
-            '7' => Some(Card::Card7),
-            '6' => Some(Card::Card6),
-            '5' => Some(Card::Card5),
-            '4' => Some(Card::Card4),
-            '3' => Some(Card::Card3),
-            '2' => Some(Card::Card2),
-            _ => None,
-        }
-    }
-
-    fn cmp_p1(&self, other: &Card) -> Ordering {
-        self.cmp(other)
-    }
-
-    fn cmp_p2(&self, other: &Card) -> Ordering {
-        match (self, other) {
-            (Card::CardJ, Card::CardJ) => Ordering::Equal,
-            (_, Card::CardJ) => Ordering::Greater,
-            (Card::CardJ, _) => Ordering::Less,
-            (_, _) => self.cmp(other),
-        }
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 enum Hand {
     HighCard,
@@ -89,98 +61,127 @@ enum Hand {
     FiveOfAKind,
 }
 
-fn score_hand_p1(cards: [Card; 5]) -> Hand {
-    let counts = (0..=5)
-        .map(|count| {
-            ALL_CARDS
+fn score_hand(cards: [Card; 5], joker_status: JokerStatus) -> Hand {
+    fn check_n_of_a_kind(cards: [Card; 5], n: usize, joker_status: JokerStatus) -> bool {
+        ALL_CARDS.iter().copied().any(|ref_card| {
+            cards
                 .iter()
-                .filter(|&ref_card| {
-                    cards
-                        .iter()
-                        .copied()
-                        .filter(|card| card == ref_card)
-                        .count()
-                        == count
+                .copied()
+                .filter(|&card| {
+                    card == ref_card
+                        || (joker_status == JokerStatus::Enabled && card == Card::CardJ)
                 })
                 .count()
+                == n
         })
-        .collect::<Vec<_>>();
+    }
 
+    fn check_n_of_two_kinds(cards: [Card; 5], n: usize, joker_status: JokerStatus) -> bool {
+        for card_a in cards {
+            let card_a_count = cards.iter().copied().filter(|&card| card == card_a).count();
+            for card_b in cards {
+                let card_b_count = cards.iter().copied().filter(|&card| card == card_b).count();
+                if card_a == card_b
+                    || (joker_status == JokerStatus::Enabled
+                        && (card_a == Card::CardJ || card_b == Card::CardJ))
+                {
+                    continue;
+                }
+                let joker_count = cards
+                    .iter()
+                    .copied()
+                    .filter(|&card| joker_status == JokerStatus::Enabled && card == Card::CardJ)
+                    .count();
+                if card_a_count + card_b_count + joker_count == n {
+                    return true;
+                }
+            }
+        }
+        false
+    }
 
-    if counts[5] > 0 {
+    if check_n_of_a_kind(cards, 5, joker_status) {
         return Hand::FiveOfAKind;
     }
 
-    if counts[4] > 0 {
+    if check_n_of_a_kind(cards, 4, joker_status) {
         return Hand::FourOfAKind;
     }
 
-    if counts[3] == 1 && counts[2] == 1 {
+    if check_n_of_two_kinds(cards, 5, joker_status) {
         return Hand::FullHouse;
     }
 
-    if counts[3] > 0 {
+    if check_n_of_a_kind(cards, 3, joker_status) {
         return Hand::ThreeOfAKind;
     }
 
-    if counts[2] > 1 {
+    if check_n_of_two_kinds(cards, 4, joker_status) {
         return Hand::TwoPair;
     }
 
-    if counts[2] > 0 {
+    if check_n_of_a_kind(cards, 2, joker_status) {
         return Hand::OnePair;
     }
 
     Hand::HighCard
 }
 
-fn score_hand_p2(cards: [Card; 5]) -> Hand {
-    if let Some(i) = cards.iter().position(|&card| card == Card::CardJ) {
-        let mut copy = cards;
-
-        return ALL_CARDS
-            .into_iter()
-            .filter(|&card| card != Card::CardJ)
-            .map(|card| {
-                copy[i] = card;
-                score_hand_p2(copy)
-            })
-            .max()
-            .unwrap();
-    }
-
-    score_hand_p1(cards)
-}
-
 fn parse_hand(hand: &str) -> [Card; 5] {
     hand.chars()
-        .map(|c| Card::from_char(c).unwrap())
+        .map(|c| {
+            match c {
+                'A' => Some(Card::CardA),
+                'K' => Some(Card::CardK),
+                'Q' => Some(Card::CardQ),
+                'J' => Some(Card::CardJ),
+                'T' => Some(Card::CardT),
+                '9' => Some(Card::Card9),
+                '8' => Some(Card::Card8),
+                '7' => Some(Card::Card7),
+                '6' => Some(Card::Card6),
+                '5' => Some(Card::Card5),
+                '4' => Some(Card::Card4),
+                '3' => Some(Card::Card3),
+                '2' => Some(Card::Card2),
+                _ => None,
+            }
+            .unwrap()
+        })
         .collect::<Vec<_>>()
         .try_into()
         .unwrap()
 }
 
-fn solve(
-    input: &str,
-    scorer: fn([Card; 5]) -> Hand,
-    comparer: fn(&Card, &Card) -> Ordering,
-) -> i32 {
+fn solve(input: &str, joker_status: JokerStatus) -> u32 {
+    let comparer: fn(&Card, &Card) -> Ordering = match joker_status {
+        JokerStatus::Disabled => Card::cmp,
+        JokerStatus::Enabled => |a, b| match (a, b) {
+            (Card::CardJ, Card::CardJ) => Ordering::Equal,
+            (_, Card::CardJ) => Ordering::Greater,
+            (Card::CardJ, _) => Ordering::Less,
+            (_, _) => a.cmp(&b),
+        },
+    };
+
     let mut hands_and_bids = input
         .lines()
         .map(|l| {
             let (hand, bid) = l.split_once(" ").unwrap();
-            (parse_hand(hand), bid.parse::<i32>().unwrap())
+            (parse_hand(hand), bid.parse::<u32>().unwrap())
         })
         .collect::<Vec<_>>();
+
     hands_and_bids.sort_by(|&(hand_a, _), &(hand_b, _)| {
-        scorer(hand_a)
-            .cmp(&scorer(hand_b))
+        score_hand(hand_a, joker_status)
+            .cmp(&score_hand(hand_b, joker_status))
             .then_with(|| hand_a.iter().cmp_by(hand_b.iter(), comparer))
     });
+
     hands_and_bids
-        .into_iter()
+        .iter()
         .enumerate()
-        .map(|(i, (_hand, bid))| (i as i32 + 1) * bid)
+        .map(|(i, (_, bid))| (i as u32 + 1) * bid)
         .sum()
 }
 
@@ -188,49 +189,47 @@ fn solve(
 mod tests {
     use super::*;
 
-    #[test]
-    fn part_1() {
-        assert_eq!(score_hand_p1(parse_hand("23456")), Hand::HighCard);
-        assert_eq!(score_hand_p1(parse_hand("A23A4")), Hand::OnePair);
-        assert_eq!(score_hand_p1(parse_hand("23432")), Hand::TwoPair);
-        assert_eq!(score_hand_p1(parse_hand("TTT98")), Hand::ThreeOfAKind);
-        assert_eq!(score_hand_p1(parse_hand("23332")), Hand::FullHouse);
-        assert_eq!(score_hand_p1(parse_hand("AA8AA")), Hand::FourOfAKind);
-        assert_eq!(score_hand_p1(parse_hand("AAAAA")), Hand::FiveOfAKind);
-
-        assert_eq!(
-            solve(
-                "32T3K 765
+    const INPUT: &str = "32T3K 765
 T55J5 684
 KK677 28
 KTJJT 220
-QQQJA 483",
-                score_hand_p1,
-                Card::cmp_p1
-            ),
-            6440
-        );
+QQQJA 483";
+
+    #[test]
+    fn part_1() {
+        fn check(hand: &str, result: Hand) {
+            assert_eq!(score_hand(parse_hand(hand), JokerStatus::Disabled), result);
+        }
+
+        check("23456", Hand::HighCard);
+        check("A23A4", Hand::OnePair);
+        check("23432", Hand::TwoPair);
+        check("TTT98", Hand::ThreeOfAKind);
+        check("23332", Hand::FullHouse);
+        check("AA8AA", Hand::FourOfAKind);
+        check("AAAAA", Hand::FiveOfAKind);
+
+        check("32T3K", Hand::OnePair);
+        check("KK677", Hand::TwoPair);
+        check("T55J5", Hand::ThreeOfAKind);
+        check("KTJJT", Hand::TwoPair);
+        check("QQQJA", Hand::ThreeOfAKind);
+
+        assert_eq!(solve(INPUT, JokerStatus::Disabled), 6440);
     }
 
     #[test]
     fn part_2() {
-        assert_eq!(score_hand_p2(parse_hand("32T3K")), Hand::OnePair);
-        assert_eq!(score_hand_p2(parse_hand("KK677")), Hand::TwoPair);
-        assert_eq!(score_hand_p2(parse_hand("T55J5")), Hand::FourOfAKind);
-        assert_eq!(score_hand_p2(parse_hand("KTJJT")), Hand::FourOfAKind);
-        assert_eq!(score_hand_p2(parse_hand("QQQJA")), Hand::FourOfAKind);
+        fn check(hand: &str, result: Hand) {
+            assert_eq!(score_hand(parse_hand(hand), JokerStatus::Enabled), result);
+        }
 
-        assert_eq!(
-            solve(
-                "32T3K 765
-T55J5 684
-KK677 28
-KTJJT 220
-QQQJA 483",
-                score_hand_p2,
-                Card::cmp_p2
-            ),
-            5905
-        );
+        check("32T3K", Hand::OnePair);
+        check("KK677", Hand::TwoPair);
+        check("T55J5", Hand::FourOfAKind);
+        check("KTJJT", Hand::FourOfAKind);
+        check("QQQJA", Hand::FourOfAKind);
+
+        assert_eq!(solve(INPUT, JokerStatus::Enabled), 5905);
     }
 }
