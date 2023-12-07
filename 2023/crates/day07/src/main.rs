@@ -1,4 +1,3 @@
-#![feature(iter_order_by)]
 use std::{
     cmp::Ordering,
     io::{stdin, Read},
@@ -175,7 +174,16 @@ fn solve(input: &str, joker_status: JokerStatus) -> u32 {
     hands_and_bids.sort_by(|&(hand_a, _), &(hand_b, _)| {
         score_hand(hand_a, joker_status)
             .cmp(&score_hand(hand_b, joker_status))
-            .then_with(|| hand_a.iter().cmp_by(hand_b.iter(), comparer))
+            .then_with(|| {
+                hand_a
+                    .iter()
+                    .copied()
+                    .zip(hand_b.iter().copied())
+                    .map(|(a, b)| comparer(&a, &b))
+                    .filter(|ord| !ord.is_eq())
+                    .next()
+                    .unwrap()
+            })
     });
 
     hands_and_bids
