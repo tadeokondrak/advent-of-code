@@ -1,22 +1,24 @@
+#![feature(test)]
+
+use fnv::FnvHashMap as HashMap;
 use std::{
-    collections::HashMap,
     io::{stdin, Read},
+    iter::Cycle,
+    str::Chars,
 };
 
 fn main() {
     let mut input = String::new();
     stdin().read_to_string(&mut input).unwrap();
-    eprintln!("p1: {}", solve_p1(&input));
-    eprintln!("p2: {}", solve_p2(&input));
+    let parsed = parse(&input);
+    eprintln!("p1: {}", solve_p1(&parsed));
+    eprintln!("p2: {}", solve_p2(&parsed));
 }
 
-fn parse<'a>(
-    input: &str,
-) -> (
-    HashMap<&str, (&str, &str)>,
-    impl Iterator<Item = char> + Clone + '_,
-) {
-    let mut edges = HashMap::new();
+type Parsed<'a> = (HashMap<&'a str, (&'a str, &'a str)>, Cycle<Chars<'a>>);
+
+fn parse<'a>(input: &str) -> Parsed {
+    let mut edges = HashMap::default();
     let (directions, links) = input.split_once("\n\n").unwrap();
     for link in links.lines() {
         let (k, v) = link.split_once(" = (").unwrap();
@@ -27,13 +29,11 @@ fn parse<'a>(
     (edges, directions.chars().cycle())
 }
 
-fn solve_p1(input: &str) -> u64 {
-    let (edges, directions) = parse(input);
-    count_steps("AAA", &edges, directions)
+fn solve_p1((edges, directions): &Parsed) -> u64 {
+    count_steps("AAA", &edges, directions.clone())
 }
 
-fn solve_p2(input: &str) -> u64 {
-    let (edges, directions) = parse(input);
+fn solve_p2((edges, directions): &Parsed) -> u64 {
     edges
         .keys()
         .filter(|k| k.ends_with("A"))
@@ -77,12 +77,15 @@ fn lcm(a: u64, b: u64) -> u64 {
 
 #[cfg(test)]
 mod tests {
+    extern crate test;
+
     use super::*;
+    use test::Bencher;
 
     #[test]
-    fn part_1() {
+    fn example_p1() {
         assert_eq!(
-            solve_p1(
+            solve_p1(&parse(
                 "RL
 
 AAA = (BBB, CCC)
@@ -92,15 +95,15 @@ DDD = (DDD, DDD)
 EEE = (EEE, EEE)
 GGG = (GGG, GGG)
 ZZZ = (ZZZ, ZZZ)"
-            ),
+            )),
             2
         );
     }
 
     #[test]
-    fn part_2() {
+    fn example_p2() {
         assert_eq!(
-            solve_p2(
+            solve_p2(&parse(
                 "LR
 
 11A = (11B, XXX)
@@ -111,8 +114,28 @@ ZZZ = (ZZZ, ZZZ)"
 22C = (22Z, 22Z)
 22Z = (22B, 22B)
 XXX = (XXX, XXX)"
-            ),
+            )),
             6
         );
+    }
+
+    #[bench]
+    fn parsing(b: &mut Bencher) {
+        let input = std::fs::read_to_string("input").unwrap();
+        b.iter(|| drop(parse(&input)));
+    }
+
+    #[bench]
+    fn real_p1(b: &mut Bencher) {
+        let input = std::fs::read_to_string("input").unwrap();
+        let parsed = parse(&input);
+        b.iter(|| assert_eq!(solve_p1(&parsed), 16897));
+    }
+
+    #[bench]
+    fn real_p2(b: &mut Bencher) {
+        let input = std::fs::read_to_string("input").unwrap();
+        let parsed = parse(&input);
+        b.iter(|| assert_eq!(solve_p2(&parsed), 16563603485021));
     }
 }
