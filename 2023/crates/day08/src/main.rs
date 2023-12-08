@@ -11,10 +11,10 @@ fn main() {
 }
 
 fn parse<'a>(
-    input: &'a str,
+    input: &str,
 ) -> (
-    HashMap<String, (String, String)>,
-    impl Iterator<Item = char> + Clone + 'a,
+    HashMap<&str, (&str, &str)>,
+    impl Iterator<Item = char> + Clone + '_,
 ) {
     let mut edges = HashMap::new();
     let (directions, links) = input.split_once("\n\n").unwrap();
@@ -22,7 +22,7 @@ fn parse<'a>(
         let (k, v) = link.split_once(" = (").unwrap();
         let v = v.strip_suffix(")").unwrap();
         let (left, right) = v.split_once(", ").unwrap();
-        edges.insert(k.to_string(), (left.to_string(), right.to_string()));
+        edges.insert(k, (left, right));
     }
     (edges, directions.chars().cycle())
 }
@@ -44,7 +44,7 @@ fn solve_p2(input: &str) -> u64 {
 
 fn count_steps(
     pos: &str,
-    edges: &HashMap<String, (String, String)>,
+    edges: &HashMap<&str, (&str, &str)>,
     mut directions: impl Iterator<Item = char>,
 ) -> u64 {
     let mut pos = pos; // fixes lifetime issue
