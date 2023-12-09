@@ -14,14 +14,25 @@ fn main() {
     eprintln!("p2: {}", solve_p2(&parsed));
 }
 
-type Parsed<'a> = (Vec<u16>, Vec<u16>, Vec<u16>, Cycle<Chars<'a>>);
+type Parsed<'a> = (
+    Vec<u16>,
+    &'static [u16; pack("ZZZ") as usize + 1],
+    &'static [u16; pack("ZZZ") as usize + 1],
+    Cycle<Chars<'a>>,
+);
 
-fn pack(name: &str) -> u16 {
+const fn pack(name: &str) -> u16 {
     assert!(name.len() == 3);
-    name.bytes().fold(0u16, |acc, b| {
+    let mut acc = 0;
+    let bytes = name.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        let b = bytes[i];
         assert!(b'A' <= b && b <= b'Z');
-        (acc << 5) | u16::from(b - b'A')
-    })
+        acc = (acc << 5) | (b - b'A') as u16;
+        i += 1;
+    }
+    acc
 }
 
 fn is_start(packed: u16) -> bool {
@@ -33,10 +44,10 @@ fn is_end(packed: u16) -> bool {
 }
 
 fn parse<'a>(input: &str) -> Parsed {
-    let mut all = Vec::new();
-    let mut lefts = Vec::new();
-    let mut rights = Vec::new();
     let (directions, links) = input.split_once("\n\n").unwrap();
+    let mut all = Vec::new();
+    let mut lefts = [0; pack("ZZZ") as usize + 1];
+    let mut rights = [0; pack("ZZZ") as usize + 1];
     for link in links.lines() {
         let (k, v) = link.split_once(" = (").unwrap();
         let v = v.strip_suffix(")").unwrap();
@@ -44,15 +55,16 @@ fn parse<'a>(input: &str) -> Parsed {
         let k = pack(k);
         let left = pack(left);
         let right = pack(right);
-        if usize::from(k) >= lefts.len() {
-            lefts.resize(usize::from(k + 1), 0);
-            rights.resize(usize::from(k + 1), 0);
-        }
         all.push(k);
         lefts[usize::from(k)] = left;
         rights[usize::from(k)] = right;
     }
-    (all, lefts, rights, directions.chars().cycle())
+    (
+        all,
+        Box::leak(Box::new(lefts)),
+        Box::leak(Box::new(rights)),
+        directions.chars().cycle(),
+    )
 }
 
 fn solve_p1(parsed: &Parsed) -> u64 {
@@ -67,22 +79,20 @@ fn solve_p2(parsed: &Parsed) -> u64 {
         .fold(1u64, |acc, pos| lcm(acc, count_steps(pos, parsed)))
 }
 
-fn count_steps(pos: u16, (_, lefts, rights, directions): &Parsed) -> u64 {
-    let mut pos = pos; // fixes lifetime issue
+fn count_steps(mut pos: u16, (_, lefts, rights, directions): &Parsed) -> u64 {
+    let lefts = *lefts;
+    let rights = *rights;
     let mut steps = 0;
     let mut directions = directions.clone();
-    loop {
-        let c = directions.next().unwrap();
-        if is_end(pos) {
-            break steps;
-        }
-        pos = match c {
+    while !is_end(pos) {
+        pos = match directions.next().unwrap() {
             'L' => lefts[usize::from(pos)],
             'R' => rights[usize::from(pos)],
             _ => panic!(),
         };
         steps += 1;
     }
+    steps
 }
 
 fn gcd(a: u64, b: u64) -> u64 {
@@ -102,6 +112,7 @@ mod tests {
     extern crate test;
 
     use super::*;
+    use std::hint::black_box;
     use test::Bencher;
 
     #[test]
@@ -152,13 +163,13 @@ XXX = (XXX, XXX)"
     fn real_p1(b: &mut Bencher) {
         let input = std::fs::read_to_string("input").unwrap();
         let parsed = parse(&input);
-        b.iter(|| assert_eq!(solve_p1(&parsed), 16897));
+        b.iter(|| assert_eq!(solve_p1(black_box(&parsed)), 16897));
     }
 
     #[bench]
     fn real_p2(b: &mut Bencher) {
         let input = std::fs::read_to_string("input").unwrap();
         let parsed = parse(&input);
-        b.iter(|| assert_eq!(solve_p2(&parsed), 16563603485021));
+        b.iter(|| assert_eq!(solve_p2(black_box(&parsed)), 16563603485021));
     }
 }
