@@ -1,93 +1,109 @@
-use std::{
-    collections::HashSet,
-    io::{stdin, Read},
-};
+#![feature(test)]
+
+use std::io::{stdin, Read};
 
 fn main() {
     let mut input = String::new();
     stdin().read_to_string(&mut input).unwrap();
-    eprintln!("p1: {}", solve(&input, 2));
-    eprintln!("p2: {}", solve(&input, 1_000_000));
+    eprintln!("p1: {}", solve(parse(&input), 2));
+    eprintln!("p2: {}", solve(parse(&input), 1_000_000));
 }
 
-fn solve(input: &str, n: u64) -> u64 {
+type Parsed = Vec<(u32, u32)>;
+
+fn parse(input: &str) -> Parsed {
     let mut galaxies = Vec::new();
-    for (x, line) in input.lines().enumerate() {
-        for (y, c) in line.chars().enumerate() {
+    for (y, line) in input.lines().enumerate() {
+        for (x, c) in line.chars().enumerate() {
             if c == '#' {
-                galaxies.push((x as u64, y as u64));
+                galaxies.push((x as u32, y as u32));
             }
         }
     }
+    galaxies
+}
 
+fn solve(mut galaxies: Parsed, n: u32) -> u64 {
+    galaxies.sort_unstable_by_key(|&(gx, _gy)| gx);
     let mut x = 0;
-    loop {
-        if galaxies.iter().copied().all(|(gx, _gy)| gx < x) {
-            break;
-        }
-        if galaxies.iter().copied().any(|(gx, _gy)| gx == x) {
-            x += 1;
-            continue;
-        }
-        for (gx, _gy) in galaxies.iter_mut() {
-            assert_ne!(*gx, x);
-            if *gx > x {
-                *gx += n - 1;
+    'outer: loop {
+        let mut seen = false;
+        for &(gx, _gy) in &galaxies {
+            if gx == x {
+                x += 1;
+                continue 'outer;
+            }
+            if gx > x {
+                seen = true;
             }
         }
+        if !seen {
+            break;
+        }
+
+        let pp = galaxies.partition_point(|&(gx, _gy)| gx <= x);
+
+        for (gx, _gy) in &mut galaxies[pp..] {
+            debug_assert!(*gx > x);
+            *gx += n - 1;
+        }
+
         x += n;
     }
 
+    galaxies.sort_unstable_by_key(|&(_gx, gy)| gy);
+
     let mut y = 0;
-    loop {
-        if galaxies.iter().copied().all(|(_gx, gy)| gy < y) {
-            break;
-        }
-        if galaxies.iter().copied().any(|(_gx, gy)| gy == y) {
-            y += 1;
-            continue;
-        }
-        for (_gx, gy) in galaxies.iter_mut() {
-            assert_ne!(*gy, y);
-            if *gy > y {
-                *gy += n - 1;
+    'outer: loop {
+        let mut seen = false;
+        for &(_gx, gy) in &galaxies {
+            if gy == y {
+                y += 1;
+                continue 'outer;
+            }
+            if gy > y {
+                seen = true;
             }
         }
+        if !seen {
+            break;
+        }
+
+        let pp = galaxies.partition_point(|&(_gx, gy)| gy <= y);
+
+        for (_gx, gy) in &mut galaxies[pp..] {
+            debug_assert!(*gy > y);
+            *gy += n - 1;
+        }
+
         y += n;
     }
 
-    let mut seen = HashSet::new();
-    galaxies
-        .iter()
-        .copied()
-        .enumerate()
-        .map(|(ai, galaxy_a)| {
-            galaxies
-                .iter()
-                .copied()
-                .enumerate()
-                .filter(|&(_bi, galaxy)| galaxy != galaxy_a)
-                .map(|(bi, galaxy_b)| {
-                    if seen.insert((ai.min(bi), bi.max(ai))) {
-                        galaxy_a.0.abs_diff(galaxy_b.0) + galaxy_a.1.abs_diff(galaxy_b.1)
-                    } else {
-                        0
-                    }
-                })
-                .sum::<u64>()
-        })
-        .sum::<u64>()
+    let mut sum = 0;
+    for i in 0..galaxies.len() {
+        for j in i + 1..galaxies.len() {
+            let galaxy_a = galaxies[i];
+            let galaxy_b = galaxies[j];
+            sum += u64::from(galaxy_a.0.abs_diff(galaxy_b.0) + galaxy_a.1.abs_diff(galaxy_b.1));
+        }
+    }
+
+    sum
 }
 
 #[cfg(test)]
 mod tests {
+    extern crate test;
+
     use super::*;
+    use test::{black_box, Bencher};
 
     #[test]
     fn part_1() {
         assert_eq!(
             solve(
-                "...#......
+                parse(
+                    "...#......
 .......#..
 #.........
 ..........
@@ -96,7 +112,8 @@ mod tests {
 .........#
 ..........
 .......#..
-#...#.....",
+#...#....."
+                ),
                 2
             ),
             374
@@ -107,7 +124,8 @@ mod tests {
     fn part_2() {
         assert_eq!(
             solve(
-                "...#......
+                parse(
+                    "...#......
 .......#..
 #.........
 ..........
@@ -116,7 +134,8 @@ mod tests {
 .........#
 ..........
 .......#..
-#...#.....",
+#...#....."
+                ),
                 10
             ),
             1030
@@ -124,7 +143,8 @@ mod tests {
 
         assert_eq!(
             solve(
-                "...#......
+                parse(
+                    "...#......
 .......#..
 #.........
 ..........
@@ -133,10 +153,31 @@ mod tests {
 .........#
 ..........
 .......#..
-#...#.....",
+#...#....."
+                ),
                 100
             ),
             8410
         );
+    }
+
+    #[bench]
+    fn parsing(b: &mut Bencher) {
+        let input = std::fs::read_to_string("input").unwrap();
+        b.iter(|| drop(parse(&input)));
+    }
+
+    #[bench]
+    fn real_p1(b: &mut Bencher) {
+        let input = std::fs::read_to_string("input").unwrap();
+        let parsed = parse(&input);
+        b.iter(|| assert_eq!(solve(black_box(parsed.clone()), 2), 9805264));
+    }
+
+    #[bench]
+    fn real_p2(b: &mut Bencher) {
+        let input = std::fs::read_to_string("input").unwrap();
+        let parsed = parse(&input);
+        b.iter(|| assert_eq!(solve(black_box(parsed.clone()), 1_000_000), 779032247216));
     }
 }
