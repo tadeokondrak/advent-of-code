@@ -24,38 +24,9 @@ fn parse(input: &str) -> Parsed {
 }
 
 fn solve(mut galaxies: Parsed, n: u32) -> u64 {
-    galaxies.sort_unstable_by_key(|&(gx, _gy)| gx);
-
     let mut ranges = Vec::new();
-    let (max_x, _) = galaxies.last().copied().unwrap();
-    let mut last_col = None;
-    for col in 0..=max_x {
-        if galaxies
-            .binary_search_by_key(&col, |&(gx, _gy)| gx)
-            .is_err()
-        {
-            if let Some(last_col) = last_col {
-                let start = galaxies.partition_point(|&(gx, _gy)| gx <= last_col);
-                let end = galaxies.partition_point(|&(gx, _gy)| gx <= col);
-                ranges.push(start..end);
-            }
-            last_col = Some(col);
-        }
-    }
-    if let Some(last_col) = last_col {
-        let start = galaxies.partition_point(|&(gx, _gy)| gx <= last_col);
-        let end = galaxies.len();
-        ranges.push(start..end);
-    }
 
-    for (i, range) in ranges.iter().cloned().enumerate() {
-        for (gx, _gy) in &mut galaxies[range] {
-            *gx += (i as u32 + 1) * (n - 1);
-        }
-    }
-
-    galaxies.sort_unstable_by_key(|&(_gx, gy)| gy);
-    ranges.clear();
+    // galaxies.sort_unstable_by_key(|&(_gx, gy)| gy);
     let (_, max_y) = galaxies.last().copied().unwrap();
     let mut last_col = None;
     for col in 0..=max_y {
@@ -80,6 +51,36 @@ fn solve(mut galaxies: Parsed, n: u32) -> u64 {
     for (i, range) in ranges.iter().cloned().enumerate() {
         for (_gx, gy) in &mut galaxies[range] {
             *gy += (i as u32 + 1) * (n - 1);
+        }
+    }
+
+    galaxies.sort_unstable_by_key(|&(gx, _gy)| gx);
+
+    ranges.clear();
+    let (max_x, _) = galaxies.last().copied().unwrap();
+    let mut last_col = None;
+    for col in 0..=max_x {
+        if galaxies
+            .binary_search_by_key(&col, |&(gx, _gy)| gx)
+            .is_err()
+        {
+            if let Some(last_col) = last_col {
+                let start = galaxies.partition_point(|&(gx, _gy)| gx <= last_col);
+                let end = galaxies.partition_point(|&(gx, _gy)| gx <= col);
+                ranges.push(start..end);
+            }
+            last_col = Some(col);
+        }
+    }
+    if let Some(last_col) = last_col {
+        let start = galaxies.partition_point(|&(gx, _gy)| gx <= last_col);
+        let end = galaxies.len();
+        ranges.push(start..end);
+    }
+
+    for (i, range) in ranges.iter().cloned().enumerate() {
+        for (gx, _gy) in &mut galaxies[range] {
+            *gx += (i as u32 + 1) * (n - 1);
         }
     }
 
