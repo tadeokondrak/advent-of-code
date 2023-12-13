@@ -1,8 +1,6 @@
-[package]
-name = "advent-of-code-2021"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+resolver = "2"
+members = ["crates/*"]
 
-[dependencies]
-aoc_driver = "0.1.4"
-permutohedron = "0.2.4"
+[profile.bench]
+lto = true
