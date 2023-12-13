@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::fmt::{self, Display};
 use std::num::ParseIntError;
 

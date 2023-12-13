@@ -1,6 +1,5 @@
 use std::io::stdin;
 
-mod intcode;
 use intcode::Intcode;
 
 fn main() {

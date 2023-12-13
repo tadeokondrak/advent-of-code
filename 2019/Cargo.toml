@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+
+[workspace.dependencies]
+intcode.path = "crates/intcode"
+
+[profile.bench]
+lto = true

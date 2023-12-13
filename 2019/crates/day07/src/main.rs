@@ -1,7 +1,6 @@
 use std::cell::Cell;
 use std::io::stdin;
 
-mod intcode;
 use intcode::Intcode;
 
 fn run(intcode: &Intcode, inputs: &[i64]) -> i64 {

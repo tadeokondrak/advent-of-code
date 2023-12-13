@@ -1,7 +1,6 @@
 use std::collections::VecDeque;
 use std::io::stdin;
 
-mod intcode;
 use intcode::{Intcode, Step};
 
 fn main() {

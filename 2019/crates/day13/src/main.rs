@@ -2,7 +2,6 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::io::stdin;
 
-mod intcode;
 use intcode::{Intcode, Step};
 
 fn run(mut intcode: Intcode, quarters: i64) -> (i64, i64) {
