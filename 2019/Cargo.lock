@@ -3,65 +3,65 @@
 version = 3
 
 [[package]]
-name = "day01"
+name = "aoc2019day01"
 version = "0.1.0"
 
 [[package]]
-name = "day02"
-version = "0.1.0"
-dependencies = [
- "intcode",
-]
-
-[[package]]
-name = "day03"
-version = "0.1.0"
-
-[[package]]
-name = "day04"
+name = "aoc2019day02"
 version = "0.1.0"
 dependencies = [
  "intcode",
 ]
 
 [[package]]
-name = "day05"
+name = "aoc2019day03"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2019day04"
 version = "0.1.0"
 dependencies = [
  "intcode",
 ]
 
 [[package]]
-name = "day06"
-version = "0.1.0"
-
-[[package]]
-name = "day07"
+name = "aoc2019day05"
 version = "0.1.0"
 dependencies = [
  "intcode",
 ]
 
 [[package]]
-name = "day08"
+name = "aoc2019day06"
 version = "0.1.0"
 
 [[package]]
-name = "day09"
-version = "0.1.0"
-dependencies = [
- "intcode",
-]
-
-[[package]]
-name = "day13"
+name = "aoc2019day07"
 version = "0.1.0"
 dependencies = [
  "intcode",
 ]
 
 [[package]]
-name = "day23"
+name = "aoc2019day08"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2019day09"
+version = "0.1.0"
+dependencies = [
+ "intcode",
+]
+
+[[package]]
+name = "aoc2019day13"
+version = "0.1.0"
+dependencies = [
+ "intcode",
+]
+
+[[package]]
+name = "aoc2019day23"
 version = "0.1.0"
 dependencies = [
  "intcode",

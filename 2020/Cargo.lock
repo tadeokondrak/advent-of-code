@@ -3,37 +3,37 @@
 version = 3
 
 [[package]]
-name = "day01"
+name = "aoc2020day01"
 version = "0.1.0"
 
 [[package]]
-name = "day02"
+name = "aoc2020day02"
 version = "0.1.0"
 
 [[package]]
-name = "day03"
+name = "aoc2020day03"
 version = "0.1.0"
 
 [[package]]
-name = "day04"
+name = "aoc2020day04"
 version = "0.1.0"
 
 [[package]]
-name = "day05"
+name = "aoc2020day05"
 version = "0.1.0"
 
 [[package]]
-name = "day06"
+name = "aoc2020day06"
 version = "0.1.0"
 
 [[package]]
-name = "day07"
+name = "aoc2020day07"
 version = "0.1.0"
 
 [[package]]
-name = "day08"
+name = "aoc2020day08"
 version = "0.1.0"
 
 [[package]]
-name = "day09"
+name = "aoc2020day09"
 version = "0.1.0"

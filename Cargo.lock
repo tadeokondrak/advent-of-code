@@ -12,6 +12,178 @@ dependencies = [
 ]
 
 [[package]]
+name = "aoc2015day05"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2018day01"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2018day02"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2018day03"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2019day01"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2019day02"
+version = "0.1.0"
+dependencies = [
+ "intcode",
+]
+
+[[package]]
+name = "aoc2019day03"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2019day04"
+version = "0.1.0"
+dependencies = [
+ "intcode",
+]
+
+[[package]]
+name = "aoc2019day05"
+version = "0.1.0"
+dependencies = [
+ "intcode",
+]
+
+[[package]]
+name = "aoc2019day06"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2019day07"
+version = "0.1.0"
+dependencies = [
+ "intcode",
+]
+
+[[package]]
+name = "aoc2019day08"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2019day09"
+version = "0.1.0"
+dependencies = [
+ "intcode",
+]
+
+[[package]]
+name = "aoc2019day13"
+version = "0.1.0"
+dependencies = [
+ "intcode",
+]
+
+[[package]]
+name = "aoc2019day23"
+version = "0.1.0"
+dependencies = [
+ "intcode",
+]
+
+[[package]]
+name = "aoc2020day01"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2020day02"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2020day03"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2020day04"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2020day05"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2020day06"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2020day07"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2020day08"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2020day09"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2021day01"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2021day02"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2021day03"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2021day04"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2021day05"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2021day06"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2021day07"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2021day08"
+version = "0.1.0"
+dependencies = [
+ "permutohedron",
+]
+
+[[package]]
+name = "aoc2021day09"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2021day10"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2021day11"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2021day12"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2021day13"
+version = "0.1.0"
+
+[[package]]
 name = "aoc2022day01"
 version = "0.1.0"
 
@@ -103,6 +275,58 @@ name = "aoc2022day18"
 version = "0.1.0"
 
 [[package]]
+name = "aoc2023day01"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2023day02"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2023day03"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2023day04"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2023day05"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2023day06"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2023day07"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2023day08"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2023day09"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2023day10"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2023day11"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2023day12"
+version = "0.1.0"
+
+[[package]]
+name = "aoc2023day13"
+version = "0.1.0"
+
+[[package]]
 name = "const_format"
 version = "0.2.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -132,6 +356,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "intcode"
+version = "0.1.0"
+
+[[package]]
 name = "itoa"
 version = "1.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -148,6 +376,12 @@ name = "memchr"
 version = "2.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f665ee40bc4a3c5590afb1e9677db74a508659dfd71e126420da8274909a0167"
+
+[[package]]
+name = "permutohedron"
+version = "0.2.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b687ff7b5da449d39e418ad391e5e08da53ec334903ddbb921db208908fc372c"
 
 [[package]]
 name = "proc-macro2"

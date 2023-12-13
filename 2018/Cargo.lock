@@ -3,13 +3,13 @@
 version = 3
 
 [[package]]
-name = "day01"
+name = "aoc2018day01"
 version = "0.1.0"
 
 [[package]]
-name = "day02"
+name = "aoc2018day02"
 version = "0.1.0"
 
 [[package]]
-name = "day03"
+name = "aoc2018day03"
 version = "0.1.0"
