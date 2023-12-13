@@ -116,21 +116,21 @@ fn solve_real(
     total
 }
 
-fn solve(springs: &str, groups: &str) -> u64 {
+fn solve(springs: &str, groups: &str, cache: &mut HashMap<(Vec<u8>, Vec<u64>), u64>) -> u64 {
     let mut springs = springs.as_bytes().to_owned();
     let groups = groups
         .split(",")
         .map(|x| x.parse::<u64>().unwrap())
         .collect::<Vec<_>>();
 
-    solve_real(&mut springs, &groups, &mut HashMap::new())
+    solve_real(&mut springs, &groups, cache)
 }
 
 fn solve_p1(input: &str) -> u64 {
     let mut total_count = 0;
     for line in input.lines() {
         let (springs, groups) = line.split_once(" ").unwrap();
-        total_count += solve(springs, groups);
+        total_count += solve(springs, groups, &mut HashMap::new());
     }
     total_count
 }
@@ -149,7 +149,7 @@ fn solve_p2(input: &str) -> u64 {
             .take(5)
             .intersperse(",")
             .collect();
-        total_count += solve(&springs, &groups);
+        total_count += solve(&springs, &groups, &mut HashMap::new());
     }
     total_count
 }
