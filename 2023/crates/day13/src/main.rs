@@ -14,49 +14,55 @@ enum Mode {
 }
 
 fn reflects_vertical(grid: &Grid<u8>, row: usize, mode: Mode) -> bool {
-    let mut diff = false;
+    let mut seen_anomaly = false;
     for i in 0.. {
         if row - i == 0 {
             break;
         }
 
-        let t = row - i - 1;
-        let b = row + i;
+        let top = row - i - 1;
+        let bottom = row + i;
 
-        let t_range = match grid.data.get(t * grid.width..t * grid.width + grid.width) {
+        let top_range = match grid
+            .data
+            .get(top * grid.width..top * grid.width + grid.width)
+        {
             Some(x) => x,
             None => {
                 break;
             }
         };
 
-        let b_range = match grid.data.get(b * grid.width..b * grid.width + grid.width) {
+        let bottom_range = match grid
+            .data
+            .get(bottom * grid.width..bottom * grid.width + grid.width)
+        {
             Some(x) => x,
             None => {
                 break;
             }
         };
 
-        let check = grid.width
-            - t_range
-                .iter()
-                .copied()
-                .zip(b_range.iter().copied())
-                .filter(|(a, b)| a == b)
-                .count();
-        match check {
+        let match_count = top_range
+            .iter()
+            .copied()
+            .zip(bottom_range.iter().copied())
+            .filter(|(a, b)| a == b)
+            .count();
+        let anomalies = grid.width - match_count;
+        match anomalies {
             0 => continue,
             1 => {
-                if diff {
+                if seen_anomaly {
                     return false;
                 }
-                diff = true;
+                seen_anomaly = true;
             }
             _ => return false,
         }
     }
 
-    diff == (mode == Mode::Part2)
+    seen_anomaly == (mode == Mode::Part2)
 }
 
 fn solve(input: &str, mode: Mode) -> usize {
