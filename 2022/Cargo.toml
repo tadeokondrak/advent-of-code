@@ -1,75 +1,9 @@
-[package]
-name = "advent-of-code-2022"
-version = "0.0.0"
-edition = "2021"
-publish = false
-authors = ["Tadeo Kondrak <me@tadeo.ca>"]
+[workspace]
+resolver = "2"
+members = ["crates/*"]
 
-[dependencies]
-sscanf = "0.4.0"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1"
+[workspace.dependencies]
+util.path = "crates/util"
 
-[[bin]]
-name = "01"
-path = "01.rs"
-
-[[bin]]
-name = "02"
-path = "02.rs"
-
-[[bin]]
-name = "03"
-path = "03.rs"
-
-[[bin]]
-name = "04"
-path = "04.rs"
-
-[[bin]]
-name = "05"
-path = "05.rs"
-
-[[bin]]
-name = "06"
-path = "06.rs"
-
-[[bin]]
-name = "07"
-path = "07.rs"
-
-[[bin]]
-name = "08"
-path = "08.rs"
-
-[[bin]]
-name = "09"
-path = "09.rs"
-
-[[bin]]
-name = "10"
-path = "10.rs"
-
-[[bin]]
-name = "11"
-path = "11.rs"
-
-[[bin]]
-name = "12"
-path = "12.rs"
-
-[[bin]]
-name = "13"
-path = "13.rs"
-
-[[bin]]
-name = "14"
-path = "14.rs"
-
-[[bin]]
-name = "15"
-path = "15.rs"
-
-[[bin]]
-name = "18"
-path = "18.rs"
+[profile.bench]
+lto = true

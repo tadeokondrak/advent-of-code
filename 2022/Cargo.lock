@@ -3,15 +3,6 @@
 version = 3
 
 [[package]]
-name = "advent-of-code-2022"
-version = "0.0.0"
-dependencies = [
- "serde",
- "serde_json",
- "sscanf",
-]
-
-[[package]]
 name = "aho-corasick"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -48,6 +39,97 @@ checksum = "ec182b0ca2f35d8fc196cf3404988fd8b8c739a4d270ff118a398feb0cbec1ca"
 dependencies = [
  "unicode-segmentation",
 ]
+
+[[package]]
+name = "day01"
+version = "0.1.0"
+
+[[package]]
+name = "day02"
+version = "0.1.0"
+
+[[package]]
+name = "day03"
+version = "0.1.0"
+
+[[package]]
+name = "day04"
+version = "0.1.0"
+dependencies = [
+ "sscanf",
+]
+
+[[package]]
+name = "day05"
+version = "0.1.0"
+dependencies = [
+ "sscanf",
+]
+
+[[package]]
+name = "day06"
+version = "0.1.0"
+
+[[package]]
+name = "day07"
+version = "0.1.0"
+dependencies = [
+ "sscanf",
+]
+
+[[package]]
+name = "day08"
+version = "0.1.0"
+
+[[package]]
+name = "day09"
+version = "0.1.0"
+dependencies = [
+ "util",
+]
+
+[[package]]
+name = "day10"
+version = "0.1.0"
+
+[[package]]
+name = "day11"
+version = "0.1.0"
+
+[[package]]
+name = "day12"
+version = "0.1.0"
+dependencies = [
+ "util",
+]
+
+[[package]]
+name = "day13"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "day14"
+version = "0.1.0"
+dependencies = [
+ "sscanf",
+ "util",
+]
+
+[[package]]
+name = "day15"
+version = "0.1.0"
+dependencies = [
+ "sscanf",
+ "util",
+]
+
+[[package]]
+name = "day18"
+version = "0.1.0"
 
 [[package]]
 name = "itoa"
@@ -224,3 +306,7 @@ name = "unicode-xid"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f962df74c8c05a667b5ee8bcf162993134c104e96440b663c8daa176dc772d8c"
+
+[[package]]
+name = "util"
+version = "0.1.0"
