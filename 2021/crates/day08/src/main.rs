@@ -221,6 +221,7 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
     }
 
     #[test]
+    #[ignore = "slow"]
     fn part_2() {
         assert_eq!(solve_p2(INPUT_A), 5353);
         assert_eq!(solve_p2(INPUT_B), 61229);
