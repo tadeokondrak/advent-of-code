@@ -13,27 +13,6 @@ fn main() {
     println!("Part 2: {}", part2(&input, 4000000));
 }
 
-/*
-dump(|pt| {
-    sensors
-        .iter()
-        .copied()
-        .any(|(beacon, radius)| beacon.distance_from(pt) <= radius)
-});
-*/
-#[allow(dead_code)]
-fn dump(f: impl Fn(Point) -> bool) {
-    for y in -2..=22 {
-        eprint!("{:>2}", y);
-        for x in -2..=25 {
-            let pt = point(x, y);
-            let c = if f(pt) { "#" } else { "." };
-            eprint!("{}", c);
-        }
-        eprintln!();
-    }
-}
-
 fn parse(input: &str) -> (Vec<(Point, i32)>, HashSet<Point>) {
     let mut sensors = Vec::new();
     let mut beacons = HashSet::new();

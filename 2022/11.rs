@@ -79,7 +79,7 @@ fn part1(input: &str) -> i64 {
     let mut monkeys = input.split("\n\n").map(Monkey::parse).collect::<Vec<_>>();
     for _ in 1..=20 {
         for i in 0..monkeys.len() {
-            let mut monkey = &mut monkeys[i];
+            let monkey = &mut monkeys[i];
             let mut new_indices = Vec::new();
             for item in monkey.worry_levels.iter_mut() {
                 *item = monkey.operation.eval(*item);
@@ -109,7 +109,7 @@ fn part2(input: &str) -> i64 {
         .product::<i64>();
     for _ in 1..=10000 {
         for i in 0..monkeys.len() {
-            let mut monkey = &mut monkeys[i];
+            let monkey = &mut monkeys[i];
             let mut new_indices = Vec::new();
             for item in monkey.worry_levels.iter_mut() {
                 *item = monkey.operation.eval(*item);

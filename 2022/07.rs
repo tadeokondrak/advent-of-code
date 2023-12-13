@@ -16,7 +16,7 @@ fn process(input: &str) -> HashMap<String, u64> {
     for line in input.lines().filter(|line| !line.trim().is_empty()) {
         if line.starts_with("$ ") {
             let args: Vec<&str> = line[2..].split(" ").collect();
-            match (args[0].clone(), &args[1..]) {
+            match (args[0], &args[1..]) {
                 ("cd", ["/"]) => path.clear(),
                 ("cd", [".."]) => _ = path.pop(),
                 ("cd", [dir]) => _ = path.push(dir.to_owned()),
