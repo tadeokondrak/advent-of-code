@@ -45,24 +45,12 @@ fn solve_p2(input: &str) -> usize {
 
         let mut hasher = FnvHasher::default();
         grid.data.hash(&mut hasher);
-        hashes.push(hasher.finish());
-
-        if times_left > 100
-            && hashes.len() > 1
-            && hashes[..hashes.len() - 1].contains(hashes.last().unwrap())
-        {
-            let last = hashes[..hashes.len() - 1]
-                .iter()
-                .copied()
-                .enumerate()
-                .filter(|(_, hash)| hash == hashes.last().unwrap())
-                .map(|(i, _)| i)
-                .last()
-                .unwrap();
-            let period = hashes.len() - last - 1;
-
+        let hash = hasher.finish();
+        if let Some(pos) = hashes.iter().copied().position(|h| h == hash) {
+            let period = hashes.len() - pos;
             times_left = times_left % period;
         }
+        hashes.push(hash);
     }
 
     let mut load = 0;
