@@ -1,5 +1,5 @@
+use fnv::FnvHasher;
 use std::{
-    collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
     io::{stdin, Read},
 };
@@ -14,22 +14,8 @@ fn main() {
 fn solve_p1(input: &str) -> usize {
     let mut grid = Grid::new(&input);
 
-    loop {
-        let mut did_something = false;
-        for x in 0..grid.width {
-            for y in (1..grid.height).rev() {
-                if grid.get(x, y) == b'O' && grid.get(x, y - 1) == b'.' {
-                    grid.set(x, y, b'.');
-                    grid.set(x, y - 1, b'O');
-                    did_something = true;
-                }
-            }
-        }
-
-        if !did_something {
-            break;
-        }
-    }
+    let &Grid { width, height, .. } = &grid;
+    tilt(&mut grid, 0..width, (1..height).rev(), 0, -1);
 
     let mut load = 0;
     for x in 0..grid.width {
@@ -49,42 +35,22 @@ fn solve_p2(input: &str) -> usize {
     let mut hashes = Vec::new();
     let mut times_left = 1000000000;
     while times_left > 0 {
-        loop {
-            let mut did_something = false;
-            north(&mut grid, &mut did_something);
-            if !did_something {
-                break;
-            }
-        }
-        loop {
-            let mut did_something = false;
-            west(&mut grid, &mut did_something);
-            if !did_something {
-                break;
-            }
-        }
-        loop {
-            let mut did_something = false;
-            south(&mut grid, &mut did_something);
-            if !did_something {
-                break;
-            }
-        }
-        loop {
-            let mut did_something = false;
-            east(&mut grid, &mut did_something);
-            if !did_something {
-                break;
-            }
-        }
+        let &Grid { width, height, .. } = &grid;
+        tilt(&mut grid, 0..width, (1..height).rev(), 0, -1);
+        tilt(&mut grid, (1..width).rev(), 0..height, -1, 0);
+        tilt(&mut grid, 0..width, 0..height - 1, 0, 1);
+        tilt(&mut grid, 0..width - 1, 0..height, 1, 0);
 
         times_left -= 1;
 
-        let mut hasher = DefaultHasher::new();
-        grid.hash(&mut hasher);
+        let mut hasher = FnvHasher::default();
+        grid.data.hash(&mut hasher);
         hashes.push(hasher.finish());
 
-        if hashes.len() > 1 && hashes[..hashes.len() - 1].contains(hashes.last().unwrap()) {
+        if times_left > 100
+            && hashes.len() > 1
+            && hashes[..hashes.len() - 1].contains(hashes.last().unwrap())
+        {
             let last = hashes[..hashes.len() - 1]
                 .iter()
                 .copied()
@@ -111,50 +77,28 @@ fn solve_p2(input: &str) -> usize {
     load
 }
 
-fn north(grid: &mut Grid<u8>, did_something: &mut bool) {
-    for x in 0..grid.width {
-        for y in (1..grid.height).rev() {
-            if grid.get(x, y) == b'O' && grid.get(x, y - 1) == b'.' {
-                grid.set(x, y, b'.');
-                grid.set(x, y - 1, b'O');
-                *did_something = true;
+fn tilt(
+    grid: &mut Grid<u8>,
+    x_range: impl Iterator<Item = usize> + Clone,
+    y_range: impl Iterator<Item = usize> + Clone,
+    dx: isize,
+    dy: isize,
+) {
+    loop {
+        let mut did_something = false;
+        for x in x_range.clone() {
+            for y in y_range.clone() {
+                let other_x = (x as isize + dx) as usize;
+                let other_y = (y as isize + dy) as usize;
+                if grid.get(x, y) == b'O' && grid.get(other_x, other_y) == b'.' {
+                    grid.set(x, y, b'.');
+                    grid.set(other_x, other_y, b'O');
+                    did_something = true;
+                }
             }
         }
-    }
-}
-
-fn south(grid: &mut Grid<u8>, did_something: &mut bool) {
-    for x in 0..grid.width {
-        for y in 0..grid.height - 1 {
-            if grid.get(x, y) == b'O' && grid.get(x, y + 1) == b'.' {
-                grid.set(x, y, b'.');
-                grid.set(x, y + 1, b'O');
-                *did_something = true;
-            }
-        }
-    }
-}
-
-fn west(grid: &mut Grid<u8>, did_something: &mut bool) {
-    for y in 0..grid.height {
-        for x in (1..grid.width).rev() {
-            if grid.get(x, y) == b'O' && grid.get(x - 1, y) == b'.' {
-                grid.set(x, y, b'.');
-                grid.set(x - 1, y, b'O');
-                *did_something = true;
-            }
-        }
-    }
-}
-
-fn east(grid: &mut Grid<u8>, did_something: &mut bool) {
-    for y in 0..grid.height {
-        for x in 0..grid.width - 1 {
-            if grid.get(x, y) == b'O' && grid.get(x + 1, y) == b'.' {
-                grid.set(x, y, b'.');
-                grid.set(x + 1, y, b'O');
-                *did_something = true;
-            }
+        if !did_something {
+            break;
         }
     }
 }
@@ -185,7 +129,7 @@ O.#..O.#.#
     #[test]
     fn part_2() {
         assert_eq!(
-            solve_p1(
+            solve_p2(
                 "O....#....
 O.OO#....#
 .....##...
@@ -202,7 +146,6 @@ O.#..O.#.#
     }
 }
 
-#[derive(Hash)]
 struct Grid<T> {
     data: Vec<T>,
     width: usize,
