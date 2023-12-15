@@ -14,9 +14,9 @@ fn solve_p1(input: &str) -> u32 {
 fn solve_p2(input: &str) -> u64 {
     let mut boxes: Vec<Vec<(String, u8)>> = vec![vec![]; 256];
     for x in input.trim().split(",") {
-        if let Some((name, rest)) = x.split_once("=") {
+        if let Some((name, value)) = x.split_once("=") {
             let box_index = hash(name);
-            let value = rest.parse().unwrap();
+            let value = value.parse().unwrap();
             let the_box = &mut boxes[usize::from(box_index)];
             if let Some(i) = the_box.iter().position(|(n, _v)| n == name) {
                 the_box[i] = (name.to_owned(), value);
@@ -33,8 +33,8 @@ fn solve_p2(input: &str) -> u64 {
     }
     let mut total = 0;
     for (i, the_box) in boxes.iter().enumerate() {
-        for (j, (_, focal_length)) in the_box.iter().enumerate() {
-            total += (i + 1) * (j + 1) * *focal_length as usize;
+        for (j, &(_, value)) in the_box.iter().enumerate() {
+            total += (i + 1) * (j + 1) * value as usize;
         }
     }
     total as u64
