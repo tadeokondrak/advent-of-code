@@ -62,6 +62,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "aoc2023day15"
+version = "0.1.0"
+
+[[package]]
 name = "fnv"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
