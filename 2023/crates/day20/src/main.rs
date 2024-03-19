@@ -7,6 +7,7 @@ fn main() {
     let mut input = String::new();
     stdin().read_to_string(&mut input).unwrap();
     eprintln!("p1: {}", solve_p1(&input));
+    eprintln!("p2: {}", solve_p2(&input));
 }
 
 #[derive(Debug, Default)]
@@ -21,6 +22,9 @@ struct NetworkState {
     queue: VecDeque<(Pulse, String, String)>,
     flip_flop_memory: HashMap<String, bool>,
     conjunction_memory: HashMap<String, u64>,
+    last_high_signal_time: HashMap<String, u64>,
+    high_signal_periods: HashMap<String, u64>,
+    button_count: u64,
     low_pulse_count: u64,
     high_pulse_count: u64,
 }
@@ -33,7 +37,7 @@ enum Module {
     Conjunction,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Pulse {
     Low,
     High,
@@ -83,7 +87,20 @@ impl Network {
     ) {
         match pulse {
             Pulse::Low => state.low_pulse_count += 1,
-            Pulse::High => state.high_pulse_count += 1,
+            Pulse::High => {
+                use std::collections::hash_map::Entry;
+                state.high_pulse_count += 1;
+                match state.last_high_signal_time.entry(from_name.to_owned()) {
+                    Entry::Occupied(e) => {
+                        state
+                            .high_signal_periods
+                            .insert(from_name.to_owned(), state.button_count - *e.get());
+                    }
+                    Entry::Vacant(e) => {
+                        e.insert(state.button_count);
+                    }
+                }
+            }
         }
         match self.modules.get(to_name).unwrap_or(&Module::Untyped) {
             Module::Untyped => {}
@@ -136,6 +153,7 @@ impl Network {
     }
 
     fn push_button(&self, state: &mut NetworkState) {
+        state.button_count += 1;
         self.process_pulse(state, "button", "broadcaster", Pulse::Low);
     }
 
@@ -160,6 +178,38 @@ fn solve_p1(input: &str) -> u64 {
         network.process(&mut state);
     }
     state.low_pulse_count * state.high_pulse_count
+}
+
+fn gcd(a: u64, b: u64) -> u64 {
+    if b == 0 {
+        a
+    } else {
+        gcd(b, a % b)
+    }
+}
+
+fn lcm(a: u64, b: u64) -> u64 {
+    a / gcd(a, b) * b
+}
+
+fn solve_p2(input: &str) -> u64 {
+    let network = Network::parse(input);
+    let mut state = NetworkState::default();
+    loop {
+        let rx_conj = &network.inputs["rx"][0];
+        let rx_conj_deps = &network.inputs[rx_conj];
+        if let Some(periods) = rx_conj_deps
+            .iter()
+            .map(|dep| state.high_signal_periods.get(dep).copied())
+            .collect::<Option<Vec<u64>>>()
+        {
+            break periods
+                .into_iter()
+                .fold(1u64, |acc, period| lcm(acc, period));
+        }
+        network.push_button(&mut state);
+        network.process(&mut state);
+    }
 }
 
 #[cfg(test)]
