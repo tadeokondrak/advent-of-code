@@ -7,7 +7,7 @@ fn main() {
     let mut input = String::new();
     stdin().read_to_string(&mut input).unwrap();
     eprintln!("p1: {}", solve_p1(&input));
-    eprintln!("p2: {}", solve_p2(&input));
+    //eprintln!("p2: {}", solve_p2(&input));
 }
 
 fn solve_p1(input: &str) -> u32 {
