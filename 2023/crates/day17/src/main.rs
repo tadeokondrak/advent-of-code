@@ -126,7 +126,6 @@ fn solve_p2(input: &str) -> u32 {
     queue.push((cmp::Reverse(startxcost), startx));
     queue.push((cmp::Reverse(startycost), starty));
     while let Some((cmp::Reverse(cur_cost), cur)) = queue.pop() {
-        //eprintln!("{cur:?}");
         if cur.x == width - 1 && cur.y == height - 1 {
             break;
         }

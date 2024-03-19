@@ -1,9 +1,66 @@
 use std::{
-    cmp::Ordering,
+    cmp::{max, min},
     collections::HashMap,
     io::{stdin, Read},
-    ops::Range,
 };
+
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord)]
+struct Range {
+    start: i64,
+    end: i64,
+}
+
+impl std::fmt::Debug for Range {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[{}, {})", self.start, self.end)
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+struct Split<T> {
+    matching: T,
+    not_matching: T,
+}
+
+impl Range {
+    fn len(self) -> i64 {
+        assert!(self.start <= self.end);
+        self.end - self.start
+    }
+
+    fn is_empty(self) -> bool {
+        self.len() == 0
+    }
+
+    fn split(self, predicate: Predicate) -> Split<Range> {
+        match predicate {
+            Predicate::Any => Split {
+                matching: self,
+                not_matching: Range::default(),
+            },
+            Predicate::Less(_, v) => Split {
+                matching: Range {
+                    start: min(self.start, v),
+                    end: min(self.end, v),
+                },
+                not_matching: Range {
+                    start: max(self.start, v),
+                    end: max(max(self.start, v), self.end),
+                },
+            },
+            Predicate::Greater(_, v) => Split {
+                matching: Range {
+                    start: max(self.start, v + 1),
+                    end: max(self.end, v + 1),
+                },
+                not_matching: Range {
+                    start: min(min(self.end, v + 1), self.start),
+                    end: min(self.end, v + 1),
+                },
+            },
+        }
+    }
+}
 
 fn main() {
     let mut input = String::new();
@@ -19,100 +76,43 @@ enum Action {
     Goto(String),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 enum Predicate {
     Any,
-    Less(String, i64),
-    Greater(String, i64),
+    Less(usize, i64),
+    Greater(usize, i64),
 }
 
 impl Predicate {
-    fn eval(&self, input: [i64; 4]) -> bool {
-        match self {
-            Predicate::Any => true,
-            Predicate::Less(var, v) => extract(input, var) < *v,
-            Predicate::Greater(var, v) => extract(input, var) > *v,
+    fn eval(self, input: [Range; 4]) -> Split<[Range; 4]> {
+        for i in 0..4 {
+            match self {
+                Predicate::Less(j, _) | Predicate::Greater(j, _) if i == j => {
+                    let Split {
+                        matching,
+                        not_matching,
+                    } = input[i].split(self);
+                    let mut matching_input = input;
+                    let mut not_matching_input = input;
+                    matching_input[i] = matching;
+                    not_matching_input[i] = not_matching;
+                    return Split {
+                        matching: matching_input,
+                        not_matching: not_matching_input,
+                    };
+                }
+                _ => {}
+            };
+        }
+        Split {
+            matching: input,
+            not_matching: Default::default(),
         }
     }
-
-    fn eval2(&self, input: [Range<i64>; 4]) -> Vec<[Range<i64>; 4]> {
-        eprintln!("eval2 {self:?} {input:?}");
-        match self {
-            Predicate::Any => vec![input],
-            Predicate::Less(var, v) => split_less(extract(input.clone(), var), *v)
-                .into_iter()
-                .map(|val| replace(input.clone(), var, val))
-                .collect(),
-            Predicate::Greater(var, v) => split_greater(extract(input.clone(), var), *v)
-                .into_iter()
-                .map(|val| replace(input.clone(), var, val))
-                .collect(),
-        }
-    }
 }
 
-fn split_greater(range: Range<i64>, v: i64) -> Vec<Range<i64>> {
-    if range.start > v {
-        return vec![range];
-    }
-    if range.end < v {
-        return vec![];
-    }
-    vec![(v + 1)..range.end]
-}
-
-fn split_less(range: Range<i64>, v: i64) -> Vec<Range<i64>> {
-    if range.end < v {
-        return vec![range];
-    }
-    if range.start > v {
-        return vec![];
-    }
-    vec![range.start..v]
-}
-
-fn complement(range: Range<i64>) -> Vec<Range<i64>> {
-    vec![1..range.start, range.end..4001]
-}
-
-fn difference(lhs: Range<i64>, rhs: Range<i64>) -> Vec<Range<i64>> {
-    todo!()
-}
-
-fn difference2(lhs: [Range<i64>; 4], rhs: [Range<i64>; 4]) -> Vec<[Range<i64>; 4]> {
-    let mut result = Vec::new();
-
-    for i in 0..4 {
-        let diff = difference(lhs[i].clone(), rhs[i].clone());
-        let mut new_lhs = lhs.clone();
-
-        if !diff.is_empty() {
-            new_lhs[i] = diff[0].clone();
-            result.push(new_lhs);
-        }
-    }
-
-    result
-}
-
-fn extract<T: Clone>(input: [T; 4], var: &str) -> T {
-    match var {
-        "x" => input[0].clone(),
-        "m" => input[1].clone(),
-        "a" => input[2].clone(),
-        "s" => input[3].clone(),
-        _ => panic!(),
-    }
-}
-
-fn replace<T: Clone>(input: [T; 4], var: &str, val: T) -> [T; 4] {
-    match var {
-        "x" => [val, input[1].clone(), input[2].clone(), input[3].clone()],
-        "m" => [input[0].clone(), val, input[2].clone(), input[3].clone()],
-        "a" => [input[0].clone(), input[1].clone(), val, input[3].clone()],
-        "s" => [input[0].clone(), input[1].clone(), input[2].clone(), val],
-        _ => panic!(),
-    }
+fn letter_index(var: &str) -> Option<usize> {
+    ["x", "m", "a", "s"].into_iter().position(|it| it == var)
 }
 
 #[derive(Debug, Clone)]
@@ -141,9 +141,11 @@ fn parse_rule(input: &str) -> Rule {
 
 fn parse_predicate(pred: &str) -> Predicate {
     if let Some((var, num)) = pred.split_once(">") {
-        Predicate::Greater(var.to_owned(), num.parse().unwrap())
+        let i = letter_index(var).unwrap();
+        Predicate::Greater(i, num.parse().unwrap())
     } else if let Some((var, num)) = pred.split_once("<") {
-        Predicate::Less(var.to_owned(), num.parse().unwrap())
+        let i = letter_index(var).unwrap();
+        Predicate::Less(i, num.parse().unwrap())
     } else {
         panic!();
     }
@@ -173,69 +175,54 @@ fn parse_workflow(line: &str) -> (&str, Workflow) {
 }
 
 impl Workflow {
-    fn run(&self, workflows: &HashMap<&str, Workflow>, input: [i64; 4]) -> bool {
-        for rule in &self.rules {
-            if rule.pred.eval(input) {
-                match &rule.action {
-                    Action::Reject => return false,
-                    Action::Accept => return true,
-                    Action::Goto(workflow) => return workflows[&**workflow].run(workflows, input),
-                }
-            }
-        }
-        panic!()
-    }
-
-    fn run2(
+    fn run(
         &self,
         workflows: &HashMap<&str, Workflow>,
-        range: [Range<i64>; 4],
-    ) -> Vec<[Range<i64>; 4]> {
-        eprintln!("run2: {self:?} {range:?}");
-        let mut accepted_ranges = Vec::new();
-        let mut ranges = vec![range];
+        input: [Range; 4],
+        out: &mut Vec<[Range; 4]>,
+    ) {
+        let mut cur = input;
         for rule in &self.rules {
-            if ranges.is_empty() {
-                eprintln!("short circuiting");
-                break;
+            let Split {
+                matching,
+                not_matching,
+            } = rule.pred.eval(cur);
+            if matching.iter().any(|r| r.is_empty()) {
+                continue;
             }
-            eprintln!("rule={rule:?} ranges={ranges:?}");
-            let mut all_matched_ranges = Vec::new();
-            for range in ranges.iter().cloned() {
-                let matched_ranges = rule.pred.eval2(range.clone());
-                all_matched_ranges.extend(matched_ranges.clone());
-                for matched_range in matched_ranges {
-                    match &rule.action {
-                        Action::Reject => {
-                            // TODO
-                        }
-                        Action::Accept => {
-                            eprintln!("accepting {matched_range:?}!");
-                            accepted_ranges.push(matched_range);
-                        }
-                        Action::Goto(workflow) => {
-                            eprintln!("gotoing {workflow:?} with {matched_range:?}!");
-                            accepted_ranges.extend(
-                                workflows[&**workflow].run2(workflows, matched_range.clone()),
-                            );
-                            // TODO reject
-                        }
-                    }
+            match &rule.action {
+                Action::Reject => {}
+                Action::Accept => {
+                    out.push(matching);
                 }
-
-                // TODO now how do we process the unmatched ranges???
-            }
-            let mut new_ranges = Vec::new();
-            for range in ranges.iter().cloned() {
-                for matched_range in all_matched_ranges.clone() {
-                    new_ranges.extend(difference2(range.clone(), matched_range))
+                Action::Goto(workflow) => {
+                    workflows[workflow.as_str()].run(workflows, matching, out);
                 }
             }
-            ranges = new_ranges;
-            eprintln!("rule={rule:?} new_ranges={ranges:?}");
+            cur = not_matching;
         }
-        accepted_ranges
+        assert!(cur.into_iter().any(|x| x.is_empty()));
     }
+}
+
+fn count_possibilities(matching: [Range; 4]) -> i64 {
+    matching.into_iter().map(|range| range.len()).product()
+}
+
+fn parse_input_line(line: &str) -> [Range; 4] {
+    line.strip_prefix("{")
+        .unwrap()
+        .strip_suffix("}")
+        .unwrap()
+        .split(",")
+        .map(|field| field.split_once("=").unwrap().1.parse().unwrap())
+        .map(|value| Range {
+            start: value,
+            end: value + 1,
+        })
+        .collect::<Vec<_>>()
+        .try_into()
+        .unwrap()
 }
 
 fn solve_p1(input: &str) -> i64 {
@@ -244,38 +231,21 @@ fn solve_p1(input: &str) -> i64 {
         .split("\n")
         .map(|text| parse_workflow(text))
         .collect::<HashMap<_, _>>();
-    //let result = workflows["in"].run2(&workflows, [1..4001, 1..4001, 1..4001, 1..4001]);
-    //panic!("{result:?}");
-
     inputs
         .lines()
-        .map(|line| {
-            <[i64; 4]>::try_from(
-                line.strip_prefix("{")
-                    .unwrap()
-                    .strip_suffix("}")
-                    .unwrap()
-                    .split(",")
-                    .map(|field| field.split_once("=").unwrap().1.parse().unwrap())
-                    .collect::<Vec<_>>(),
-            )
-            .unwrap()
+        .map(|line| parse_input_line(line))
+        .filter(|&input| {
+            let mut out = Vec::new();
+            workflows["in"].run(&workflows, input, &mut out);
+            out.iter().any(|&output| count_possibilities(output) > 0)
         })
-        //.filter(|&input| {
-        //    !workflows["in"]
-        //        .run2(
-        //            &workflows,
-        //            [
-        //                input[0]..(input[0] + 1),
-        //                input[1]..(input[1] + 1),
-        //                input[2]..(input[2] + 1),
-        //                input[3]..(input[3] + 1),
-        //            ],
-        //        )
-        //        .is_empty()
-        //})
-        .filter(|&input| workflows["in"].run(&workflows, input))
-        .map(|array| array.into_iter().sum::<i64>())
+        .map(|input| {
+            input
+                .into_iter()
+                .inspect(|x| assert_eq!(x.len(), 1))
+                .map(|x| x.start)
+                .sum::<i64>()
+        })
         .sum::<i64>()
 }
 
@@ -285,18 +255,16 @@ fn solve_p2(input: &str) -> i64 {
         .split("\n")
         .map(|text| parse_workflow(text))
         .collect::<HashMap<_, _>>();
-    let result = workflows["in"].run2(&workflows, [1..4001, 1..4001, 1..4001, 1..4001]);
-    eprintln!("{result:?}");
-    result
-        .into_iter()
-        .map(|ranges| {
-            ranges
-                .map(|range| range.end - range.start)
-                .iter()
-                .copied()
-                .product::<i64>()
-        })
-        .sum()
+    let range = Range {
+        start: 1,
+        end: 4001,
+    };
+    let ranges = [range; 4];
+    let mut out = Vec::new();
+    workflows["in"].run(&workflows, ranges, &mut out);
+    out.iter()
+        .map(|&good_range| count_possibilities(good_range))
+        .sum::<i64>()
 }
 
 #[cfg(test)]
@@ -351,7 +319,7 @@ hdj{m>838:A,pv}
 {x=2461,m=1339,a=466,s=291}
 {x=2127,m=1623,a=2188,s=1013}"
             ),
-            19114
+            167409079868000
         );
     }
 }
