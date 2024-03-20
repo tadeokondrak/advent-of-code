@@ -11,19 +11,19 @@ fn main() {
 }
 
 #[derive(Debug, Default)]
-struct Network {
-    modules: HashMap<String, Module>,
-    inputs: HashMap<String, Vec<String>>,
-    outputs: HashMap<String, Vec<String>>,
+struct Network<'a> {
+    modules: HashMap<&'a str, Module>,
+    inputs: HashMap<&'a str, Vec<&'a str>>,
+    outputs: HashMap<&'a str, Vec<&'a str>>,
 }
 
 #[derive(Debug, Default)]
-struct NetworkState {
-    queue: VecDeque<(Pulse, String, String)>,
-    flip_flop_memory: HashMap<String, bool>,
-    conjunction_memory: HashMap<String, u64>,
-    last_high_signal_time: HashMap<String, u64>,
-    high_signal_periods: HashMap<String, u64>,
+struct NetworkState<'a> {
+    queue: VecDeque<(Pulse, &'a str, &'a str)>,
+    flip_flop_memory: HashMap<&'a str, bool>,
+    conjunction_memory: HashMap<&'a str, u64>,
+    last_high_signal_time: HashMap<&'a str, u64>,
+    high_signal_periods: HashMap<&'a str, u64>,
     button_count: u64,
     low_pulse_count: u64,
     high_pulse_count: u64,
@@ -43,19 +43,19 @@ enum Pulse {
     High,
 }
 
-impl Network {
-    fn parse(input: &str) -> Network {
-        fn parse_line(line: &str) -> (Module, String, Vec<String>) {
+impl<'a> Network<'a> {
+    fn parse(input: &'a str) -> Network {
+        fn parse_line<'a>(line: &'a str) -> (Module, &'a str, Vec<&'a str>) {
             let (name, outputs) = line.split_once(" -> ").unwrap();
-            let outputs: Vec<String> = outputs.split(", ").map(|s| s.to_owned()).collect();
+            let outputs = outputs.split(", ").collect();
             if let Some(name) = name.strip_prefix("%") {
-                (Module::FlipFlop, name.to_owned(), outputs)
+                (Module::FlipFlop, name, outputs)
             } else if let Some(name) = name.strip_prefix("&") {
-                (Module::Conjunction, name.to_owned(), outputs)
+                (Module::Conjunction, name, outputs)
             } else if name == "broadcaster" {
-                (Module::Broadcaster, name.to_owned(), outputs)
+                (Module::Broadcaster, name, outputs)
             } else {
-                (Module::Untyped, name.to_owned(), outputs)
+                (Module::Untyped, name, outputs)
             }
         }
 
@@ -65,13 +65,9 @@ impl Network {
             .map(|line| parse_line(line))
             .collect::<Vec<_>>()
         {
-            network.modules.insert(name.clone(), module);
+            network.modules.insert(name, module);
             for output in &outputs {
-                network
-                    .inputs
-                    .entry(output.clone())
-                    .or_default()
-                    .push(name.clone());
+                network.inputs.entry(output).or_default().push(name);
             }
             network.outputs.insert(name, outputs);
         }
@@ -80,9 +76,9 @@ impl Network {
 
     fn process_pulse(
         &self,
-        state: &mut NetworkState,
-        from_name: &str,
-        to_name: &str,
+        state: &mut NetworkState<'a>,
+        from_name: &'a str,
+        to_name: &'a str,
         pulse: Pulse,
     ) {
         match pulse {
@@ -90,11 +86,11 @@ impl Network {
             Pulse::High => {
                 use std::collections::hash_map::Entry;
                 state.high_pulse_count += 1;
-                match state.last_high_signal_time.entry(from_name.to_owned()) {
+                match state.last_high_signal_time.entry(from_name) {
                     Entry::Occupied(e) => {
                         state
                             .high_signal_periods
-                            .insert(from_name.to_owned(), state.button_count - *e.get());
+                            .insert(from_name, state.button_count - *e.get());
                     }
                     Entry::Vacant(e) => {
                         e.insert(state.button_count);
@@ -111,10 +107,7 @@ impl Network {
             }
             Module::FlipFlop => match pulse {
                 Pulse::Low => {
-                    let ff_state = state
-                        .flip_flop_memory
-                        .entry(to_name.to_owned())
-                        .or_default();
+                    let ff_state = state.flip_flop_memory.entry(to_name).or_default();
                     *ff_state = !*ff_state;
                     let ff_pulse = if *ff_state { Pulse::High } else { Pulse::Low };
                     for output in &self.outputs[to_name] {
@@ -128,12 +121,9 @@ impl Network {
                 let conj_input_count = conj_inputs.len();
                 let input_index = conj_inputs
                     .iter()
-                    .position(|input| input == from_name)
+                    .position(|&input| input == from_name)
                     .unwrap();
-                let conj_state = state
-                    .conjunction_memory
-                    .entry(to_name.to_owned())
-                    .or_default();
+                let conj_state = state.conjunction_memory.entry(to_name).or_default();
                 let bit = 1u64 << input_index;
                 match pulse {
                     Pulse::Low => *conj_state &= !bit,
@@ -152,18 +142,22 @@ impl Network {
         }
     }
 
-    fn push_button(&self, state: &mut NetworkState) {
+    fn push_button(&self, state: &mut NetworkState<'a>) {
         state.button_count += 1;
         self.process_pulse(state, "button", "broadcaster", Pulse::Low);
     }
 
-    fn queue_pulse(&self, state: &mut NetworkState, from_name: &str, to_name: &str, pulse: Pulse) {
-        state
-            .queue
-            .push_back((pulse, from_name.to_owned(), to_name.to_owned()));
+    fn queue_pulse(
+        &self,
+        state: &mut NetworkState<'a>,
+        from_name: &'a str,
+        to_name: &'a str,
+        pulse: Pulse,
+    ) {
+        state.queue.push_back((pulse, from_name, to_name));
     }
 
-    fn process(&self, state: &mut NetworkState) {
+    fn process(&self, state: &mut NetworkState<'a>) {
         while let Some((pulse, from_name, to_name)) = state.queue.pop_front() {
             self.process_pulse(state, &from_name, &to_name, pulse);
         }
