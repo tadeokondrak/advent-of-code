@@ -86,6 +86,10 @@ name = "aoc2023day20"
 version = "0.1.0"
 
 [[package]]
+name = "aoc2023day21"
+version = "0.1.0"
+
+[[package]]
 name = "fnv"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
