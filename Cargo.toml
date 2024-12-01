@@ -6,6 +6,5 @@ members = ["*/crates/*"]
 intcode.path = "2019/crates/intcode"
 util.path = "2022/crates/util"
 
-
 [profile.bench]
 lto = true
