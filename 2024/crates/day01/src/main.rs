@@ -7,38 +7,36 @@ fn main() {
     println!("Part 2: {}", part2(&input));
 }
 
-fn part1(input: &str) -> i32 {
-    let mut left = input
+fn parse(input: &str) -> (Vec<u32>, Vec<u32>) {
+    let l = input
         .lines()
         .map(|line| line.split("   ").next().unwrap().parse().unwrap())
-        .collect::<Vec<i32>>();
-    let mut right = input
+        .collect();
+    let r = input
         .lines()
         .map(|line| line.split("   ").skip(1).next().unwrap().parse().unwrap())
-        .collect::<Vec<i32>>();
-    left.sort();
-    right.sort();
-    let mut res = 0;
-    for i in 0..left.len() {
-        res += (left[i] - right[i]).abs();
-    }
-    res
+        .collect();
+    (l, r)
 }
 
-fn part2(input: &str) -> i32 {
-    let mut left = input
-        .lines()
-        .map(|line| line.split("   ").next().unwrap().parse().unwrap())
-        .collect::<Vec<i32>>();
-    let mut right = input
-        .lines()
-        .map(|line| line.split("   ").skip(1).next().unwrap().parse().unwrap())
-        .collect::<Vec<i32>>();
-    let mut res = 0;
-    for i in 0..left.len() {
-        res += left[i] * right.iter().filter(|&&rightx| rightx == left[i]).count() as i32;
-    }
-    res
+fn part1(input: &str) -> u32 {
+    let (mut l, mut r) = parse(input);
+    l.sort();
+    r.sort();
+    l.into_iter()
+        .zip(r.into_iter())
+        .map(|(lv, rv)| lv.abs_diff(rv))
+        .sum()
+}
+
+fn part2(input: &str) -> u32 {
+    let (l, r) = parse(input);
+    l.into_iter()
+        .map(|lv| {
+            let freq = r.iter().copied().filter(|&rv| rv == lv).count() as u32;
+            lv * freq
+        })
+        .sum()
 }
 
 #[cfg(test)]
