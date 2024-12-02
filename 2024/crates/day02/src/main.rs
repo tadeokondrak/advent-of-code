@@ -10,29 +10,11 @@ fn main() {
 fn part1(input: &str) -> i32 {
     let mut count = 0;
     for report in input.lines() {
-        let mut safe = true;
-        let mut increasing = false;
-        let mut decreasing = false;
-        let mut last_level = None;
-        for level in report.split_ascii_whitespace() {
-            let level = level.parse::<i32>().unwrap();
-            if let Some(last_level) = last_level {
-                if level > last_level {
-                    increasing = true;
-                }
-                if level < last_level {
-                    decreasing = true;
-                }
-                let diff = level.abs_diff(last_level);
-                if diff < 1 || diff > 3 {
-                    safe = false;
-                }
-            }
-            last_level = Some(level);
-        }
-        if increasing && decreasing {
-            safe = false;
-        }
+        let levels = report
+            .split_ascii_whitespace()
+            .map(|s| s.parse::<i32>().unwrap())
+            .collect::<Vec<i32>>();
+        let safe = check_report(&levels);
         count += safe as i32;
     }
     count
@@ -52,10 +34,8 @@ fn part2(input: &str) -> i32 {
             let safe = check_report(&levels_);
             any_safe |= safe;
         }
-
         count += any_safe as i32;
     }
-
     count
 }
 
