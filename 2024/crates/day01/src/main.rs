@@ -32,12 +32,21 @@ fn part1((l, r): &(Vec<u32>, Vec<u32>)) -> u32 {
 }
 
 fn part2((l, r): &(Vec<u32>, Vec<u32>)) -> u32 {
+    let mut counts = vec![];
+    for chunk in r.chunk_by(|a, b| a == b) {
+        counts.push((chunk[0], chunk.len() as u32));
+    }
     l.iter()
         .copied()
-        .map(|lv| {
-            let freq = r.iter().copied().filter(|&rv| rv == lv).count() as u32;
-            lv * freq
-        })
+        .map(
+            |lv| match counts.binary_search_by_key(&lv, |&(val, _count)| val) {
+                Ok(i) => {
+                    let (_val, count) = counts[i];
+                    lv * count
+                }
+                Err(_) => 0,
+            },
+        )
         .sum()
 }
 
