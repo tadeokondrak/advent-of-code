@@ -1,3 +1,4 @@
+#![feature(test)]
 use std::io::{self, Read};
 
 fn main() {
@@ -71,7 +72,11 @@ fn try_parse_mul(mut s: &str) -> Option<i32> {
 
 #[cfg(test)]
 mod tests {
+    extern crate test;
+
     use super::*;
+    use std::hint::black_box;
+    use test::Bencher;
 
     #[test]
     fn test_part1() {
@@ -87,5 +92,17 @@ mod tests {
             part2("xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"),
             48
         );
+    }
+
+    #[bench]
+    fn real_p1(b: &mut Bencher) {
+        let input = std::fs::read_to_string("input").unwrap();
+        b.iter(|| assert_eq!(part1(black_box(&input)), 159833790));
+    }
+
+    #[bench]
+    fn real_p2(b: &mut Bencher) {
+        let input = std::fs::read_to_string("input").unwrap();
+        b.iter(|| assert_eq!(part2(black_box(&input)), 89349241));
     }
 }
