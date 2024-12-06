@@ -1,8 +1,5 @@
 #![feature(test)]
-use std::{
-    collections::HashSet,
-    io::{self, Read},
-};
+use std::io::{self, Read};
 
 struct Parsed {
     grid: Vec<bool>,
@@ -20,27 +17,40 @@ fn main() {
 }
 
 fn part1(input: &str) -> i32 {
-    solve(input).unwrap().iter().copied().filter(|&x| x).count() as i32
+    let Parsed {
+        grid,
+        width,
+        height,
+        pos,
+    } = parse(input);
+    solve(&grid, width, height, pos)
+        .unwrap()
+        .iter()
+        .copied()
+        .filter(|&x| x)
+        .count() as i32
 }
 
 fn part2(input: &str) -> i32 {
     let mut count = 0;
-    let (_grid, width, height, _pos) = parse(input);
-    let visited = solve(input).unwrap();
+    let Parsed {
+        mut grid,
+        width,
+        height,
+        pos,
+    } = parse(input);
+    let visited = solve(&grid, width, height, pos).unwrap();
     for y in 0..width {
         for x in 0..height {
-            if !visited[(y * (width) + x) as usize] {
+            let i = (y * (width) + x) as usize;
+            if !visited[i] || grid[i] {
                 continue;
             }
-            let mut input = input.to_owned();
-            let i = (y * (width + 1) + x) as usize;
-            if &input[i..i + 1] == "#" || &input[i..i + 1] == "^" {
-                continue;
-            }
-            input.replace_range(i..=i, "#");
-            if solve(&input).is_none() {
+            grid[i] = true;
+            if solve(&grid, width, height, pos).is_none() {
                 count += 1;
             }
+            grid[i] = false;
         }
     }
     count
@@ -50,20 +60,19 @@ fn idx(width: i32, pos: (i32, i32)) -> usize {
     (pos.1 * width + pos.0) as usize
 }
 
-fn solve(input: &str) -> Option<Vec<bool>> {
-    let (grid, width, height, mut pos) = parse(input);
+fn solve(grid: &[bool], width: i32, height: i32, mut pos: (i32, i32)) -> Option<Vec<bool>> {
     let mut dir = (0, -1);
     let mut visited = vec![false; grid.len()];
-    let mut past_states = HashSet::new();
+    let mut past_states = vec![0u8; grid.len()];
     loop {
-        if past_states.contains(&(pos, dir)) {
+        let dirbit = 1 << dir_index(dir);
+        if past_states[idx(width, pos)] & dirbit != 0 {
             return None;
         }
-        past_states.insert((pos, dir));
+        past_states[idx(width, pos)] |= dirbit;
         visited[idx(width, pos)] = true;
 
         let next_pos = (pos.0 + dir.0, pos.1 + dir.1);
-
         if next_pos.0 < 0 || next_pos.0 >= width {
             break;
         }
@@ -100,7 +109,17 @@ fn rotate_right(dir: (i32, i32)) -> (i32, i32) {
     }
 }
 
-fn parse(input: &str) -> (Vec<bool>, i32, i32, (i32, i32)) {
+fn dir_index(dir: (i32, i32)) -> u8 {
+    match dir {
+        (0, -1) => 0,
+        (1, 0) => 1,
+        (0, 1) => 2,
+        (-1, 0) => 3,
+        _ => unreachable!(),
+    }
+}
+
+fn parse(input: &str) -> Parsed {
     let width = input.lines().next().unwrap().len() as i32;
     let height = input.lines().count() as i32;
     let mut pos = None;
@@ -115,7 +134,12 @@ fn parse(input: &str) -> (Vec<bool>, i32, i32, (i32, i32)) {
             }
         }
     }
-    (grid, width, height, pos.unwrap())
+    Parsed {
+        grid,
+        width,
+        height,
+        pos: pos.unwrap(),
+    }
 }
 
 #[cfg(test)]
