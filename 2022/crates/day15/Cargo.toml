@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 sscanf = "0.4.1"
-util.workspace = true
+util.path = "../util"
+util.package = "util2022"

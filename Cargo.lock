@@ -228,7 +228,7 @@ version = "0.1.0"
 name = "aoc2022day09"
 version = "0.1.0"
 dependencies = [
- "util",
+ "util2022",
 ]
 
 [[package]]
@@ -243,7 +243,7 @@ version = "0.1.0"
 name = "aoc2022day12"
 version = "0.1.0"
 dependencies = [
- "util",
+ "util2022",
 ]
 
 [[package]]
@@ -259,7 +259,7 @@ name = "aoc2022day14"
 version = "0.1.0"
 dependencies = [
  "sscanf",
- "util",
+ "util2022",
 ]
 
 [[package]]
@@ -267,7 +267,7 @@ name = "aoc2022day15"
 version = "0.1.0"
 dependencies = [
  "sscanf",
- "util",
+ "util2022",
 ]
 
 [[package]]
@@ -384,6 +384,9 @@ version = "0.0.0"
 [[package]]
 name = "aoc2024day06"
 version = "0.0.0"
+dependencies = [
+ "util2024",
+]
 
 [[package]]
 name = "const_format"
@@ -607,5 +610,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f962df74c8c05a667b5ee8bcf162993134c104e96440b663c8daa176dc772d8c"
 
 [[package]]
-name = "util"
+name = "util2022"
 version = "0.1.0"
+
+[[package]]
+name = "util2024"
+version = "0.0.0"
