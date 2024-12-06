@@ -42,7 +42,7 @@ fn part2(input: &str) -> i32 {
     let visited = solve(&grid, width, height, pos).unwrap();
     for y in 0..width {
         for x in 0..height {
-            let i = (y * (width) + x) as usize;
+            let i = (y * width + x) as usize;
             if !visited[i] || grid[i] {
                 continue;
             }
