@@ -1,11 +1,10 @@
 #![feature(test)]
 use std::io::{self, Read};
+use util::{offset, point, Grid, Offset, Point};
 
 struct Parsed {
-    grid: Vec<bool>,
-    width: i32,
-    height: i32,
-    pos: (i32, i32),
+    grid: Grid<bool>,
+    pos: Point,
 }
 
 fn main() {
@@ -17,127 +16,92 @@ fn main() {
 }
 
 fn part1(input: &str) -> i32 {
-    let Parsed {
-        grid,
-        width,
-        height,
-        pos,
-    } = parse(input);
-    solve(&grid, width, height, pos)
+    let Parsed { grid, pos } = parse(input);
+    solve(&grid, pos)
         .unwrap()
-        .iter()
-        .copied()
+        .data
+        .into_iter()
         .filter(|&x| x)
         .count() as i32
 }
 
 fn part2(input: &str) -> i32 {
     let mut count = 0;
-    let Parsed {
-        mut grid,
-        width,
-        height,
-        pos,
-    } = parse(input);
-    let visited = solve(&grid, width, height, pos).unwrap();
-    for y in 0..width {
-        for x in 0..height {
-            let i = (y * width + x) as usize;
-            if !visited[i] || grid[i] {
+    let Parsed { mut grid, pos } = parse(input);
+    let visited = solve(&grid, pos).unwrap();
+    for y in 0..grid.width as i32 {
+        for x in 0..grid.height as i32 {
+            if !visited[(x, y)] || grid[(x, y)] {
                 continue;
             }
-            grid[i] = true;
-            if solve(&grid, width, height, pos).is_none() {
+            grid[(x, y)] = true;
+            if solve(&grid, pos).is_none() {
                 count += 1;
             }
-            grid[i] = false;
+            grid[(x, y)] = false;
         }
     }
     count
 }
 
-fn idx(width: i32, pos: (i32, i32)) -> usize {
-    (pos.1 * width + pos.0) as usize
-}
-
-fn solve(grid: &[bool], width: i32, height: i32, mut pos: (i32, i32)) -> Option<Vec<bool>> {
-    let mut dir = (0, -1);
-    let mut visited = vec![false; grid.len()];
-    let mut past_states = vec![0u8; grid.len()];
+fn solve(grid: &Grid<bool>, mut pos: Point) -> Option<Grid<bool>> {
+    let mut dir = offset(0, -1);
+    let mut visited = Grid::new(grid.width, grid.height);
+    let mut past_states: Grid<u8> = Grid::new(grid.width, grid.height);
     loop {
         let dirbit = 1 << dir_index(dir);
-        if past_states[idx(width, pos)] & dirbit != 0 {
+        if past_states[pos] & dirbit != 0 {
             return None;
         }
-        past_states[idx(width, pos)] |= dirbit;
-        visited[idx(width, pos)] = true;
+        past_states[pos] |= dirbit;
+        visited[pos] = true;
 
-        let next_pos = (pos.0 + dir.0, pos.1 + dir.1);
-        if next_pos.0 < 0 || next_pos.0 >= width {
-            break;
-        }
-        if next_pos.1 < 0 || next_pos.1 >= height {
-            break;
+        if !grid.is_in_bounds(pos + dir) {
+            return Some(visited);
         }
 
-        let next_pos_blocked = grid[idx(width, next_pos)];
-        if next_pos_blocked {
+        while grid[pos + dir] {
             dir = rotate_right(dir);
-            let new_next_pos = (pos.0 + dir.0, pos.1 + dir.1);
-
-            if new_next_pos.0 < 0 || new_next_pos.0 >= width {
-                break;
+            if !grid.is_in_bounds(pos + dir) {
+                return Some(visited);
             }
-            if new_next_pos.1 < 0 || new_next_pos.1 >= height {
-                break;
-            }
-            pos = new_next_pos;
-        } else {
-            pos = next_pos;
         }
+
+        pos += dir;
     }
-    Some(visited)
 }
 
-fn rotate_right(dir: (i32, i32)) -> (i32, i32) {
+fn rotate_right(dir: Offset) -> Offset {
     match dir {
-        (0, -1) => (1, 0),
-        (1, 0) => (0, 1),
-        (0, 1) => (-1, 0),
-        (-1, 0) => (0, -1),
+        Offset { x: 0, y: -1 } => offset(1, 0),
+        Offset { x: 1, y: 0 } => offset(0, 1),
+        Offset { x: 0, y: 1 } => offset(-1, 0),
+        Offset { x: -1, y: 0 } => offset(0, -1),
         _ => unreachable!(),
     }
 }
 
-fn dir_index(dir: (i32, i32)) -> u8 {
+fn dir_index(dir: Offset) -> u8 {
     match dir {
-        (0, -1) => 0,
-        (1, 0) => 1,
-        (0, 1) => 2,
-        (-1, 0) => 3,
+        Offset { x: 0, y: -1 } => 0,
+        Offset { x: 1, y: 0 } => 1,
+        Offset { x: 0, y: 1 } => 2,
+        Offset { x: -1, y: 0 } => 3,
         _ => unreachable!(),
     }
 }
 
 fn parse(input: &str) -> Parsed {
-    let width = input.lines().next().unwrap().len() as i32;
-    let height = input.lines().count() as i32;
     let mut pos = None;
-    let mut grid = vec![false; (width * height) as usize];
     for (y, line) in input.lines().enumerate() {
-        let y = y as i32;
         for (x, ch) in line.chars().enumerate() {
-            let x = x as i32;
-            grid[(y * width + x) as usize] = ch == '#';
             if ch == '^' {
-                pos = Some((x, y));
+                pos = Some(point(x as i32, y as i32));
             }
         }
     }
     Parsed {
-        grid,
-        width,
-        height,
+        grid: Grid::parse(input, |c| c == '#'),
         pos: pos.unwrap(),
     }
 }
@@ -180,6 +144,6 @@ mod tests {
     #[bench]
     fn real_p2(b: &mut Bencher) {
         let input = std::fs::read_to_string("input").unwrap();
-        b.iter(|| assert_eq!(part2(black_box(&input)), 1601));
+        b.iter(|| assert_eq!(part2(black_box(&input)), 1663));
     }
 }
