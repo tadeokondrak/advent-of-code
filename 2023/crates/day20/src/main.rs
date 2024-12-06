@@ -44,7 +44,7 @@ enum Pulse {
 }
 
 impl<'a> Network<'a> {
-    fn parse(input: &'a str) -> Network {
+    fn parse(input: &'a str) -> Network<'a> {
         fn parse_line<'a>(line: &'a str) -> (Module, &'a str, Vec<&'a str>) {
             let (name, outputs) = line.split_once(" -> ").unwrap();
             let outputs = outputs.split(", ").collect();

@@ -82,7 +82,6 @@ fn solve_p1(input: &str) -> u32 {
     count
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -151,28 +150,6 @@ impl Grid<u8> {
             return false;
         }
         true
-    }
-}
-
-impl Grid<u8> {
-    fn new(s: &str) -> Self {
-        let mut data = Vec::new();
-        let mut width = 0;
-        let mut height = 0;
-        for line in s.lines() {
-            width = line.len();
-            height += 1;
-            for &c in line.as_bytes() {
-                assert_ne!(c, b'\n');
-                data.push(c);
-            }
-        }
-        assert_eq!(data.len(), width * height);
-        Self {
-            data,
-            width,
-            height,
-        }
     }
 }
 
