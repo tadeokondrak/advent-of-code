@@ -4,5 +4,5 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-util.path = "../util"
-util.package = "util2024"
+rustc-hash = "2.1.0"
+util.workspace = true

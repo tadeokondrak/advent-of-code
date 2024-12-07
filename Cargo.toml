@@ -1,9 +1,10 @@
 [workspace]
 resolver = "2"
-members = ["*/crates/*"]
+members = ["*/crates/*", "crates/util", "crates/window"]
 
 [workspace.dependencies]
-intcode.path = "2019/crates/intcode"
+util.path = "crates/util"
+window.path = "crates/window"
 
 [profile.bench]
 lto = true
