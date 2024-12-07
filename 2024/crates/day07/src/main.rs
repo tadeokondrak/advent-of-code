@@ -1,8 +1,5 @@
 #![feature(test)]
-use std::{
-    fmt::Write as _,
-    io::{self, Read},
-};
+use std::io::{self, Read};
 
 fn main() {
     let mut input = String::new();
@@ -44,7 +41,6 @@ fn part1(input: &str) -> i64 {
 
 fn part2(input: &str) -> i64 {
     let mut sum = 0;
-    let mut buf = String::new();
     for line in input.lines() {
         let mut okay = false;
         let (result, nums) = line.split_once(": ").unwrap();
@@ -55,21 +51,19 @@ fn part2(input: &str) -> i64 {
             .collect::<Vec<i64>>();
         for bits in 0..(3i64.pow(nums.len() as u32 - 1)) {
             let mut last = nums[0];
+            let mut trit = 1;
             for i in 0..nums.len() - 1 {
-                if bits / 3i64.pow(i as u32) % 3 == 0 {
-                    last = last + nums[i + 1];
-                } else if bits / 3i64.pow(i as u32) % 3 == 1 {
-                    last = last * nums[i + 1];
-                } else {
-                    assert!(bits / 3i64.pow(i as u32) % 3 == 2);
-                    //last = last * 10i64.pow(nums[i + 1].ilog10()) + nums[i + 1];
-                    buf.clear();
-                    write!(&mut buf, "{}{}", last, nums[i + 1]).unwrap();
-                    last = buf.parse().unwrap();
-                }
+                last = match bits / trit % 3 {
+                    0 => last + nums[i + 1],
+                    1 => last * nums[i + 1],
+                    2 => last * 10i64.pow(nums[i + 1].ilog10() + 1) + nums[i + 1],
+                    _ => unreachable!(),
+                };
+                trit *= 3;
             }
             if last == result {
                 okay = true;
+                break;
             }
         }
         if okay {
