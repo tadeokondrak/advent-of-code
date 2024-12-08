@@ -1,5 +1,5 @@
 use std::{
-    fmt,
+    fmt::{self, Debug, Display},
     ops::{Index, IndexMut},
 };
 
@@ -67,6 +67,50 @@ impl std::ops::Sub<Offset> for Point {
         Point {
             x: self.x - rhs.x,
             y: self.y - rhs.y,
+        }
+    }
+}
+
+impl std::ops::Add<Point> for Point {
+    type Output = Self;
+
+    fn add(self, rhs: Point) -> Self::Output {
+        Point {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+impl std::ops::Sub<Point> for Point {
+    type Output = Self;
+
+    fn sub(self, rhs: Point) -> Self::Output {
+        Point {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
+    }
+}
+
+impl std::ops::Mul<i32> for Point {
+    type Output = Self;
+
+    fn mul(self, rhs: i32) -> Self::Output {
+        Point {
+            x: self.x * rhs,
+            y: self.y * rhs,
+        }
+    }
+}
+
+impl std::ops::Div<i32> for Point {
+    type Output = Self;
+
+    fn div(self, rhs: i32) -> Self::Output {
+        Point {
+            x: self.x / rhs,
+            y: self.y / rhs,
         }
     }
 }
@@ -142,6 +186,21 @@ impl<T> Grid<T> {
     pub fn set(&mut self, pos: impl GridIndex, v: T) {
         let (x, y) = pos.coords();
         *self.get_mut((x, y)).unwrap() = v;
+    }
+}
+
+impl<T: Display> Debug for Grid<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for y in 0..self.width as i32 {
+            for x in 0..self.height as i32 {
+                let pt = point(x, y);
+                write!(f, "{}", self[pt])?;
+            }
+            if y != self.width as i32 - 1 {
+                writeln!(f)?;
+            }
+        }
+        Ok(())
     }
 }
 

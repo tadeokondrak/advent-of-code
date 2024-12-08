@@ -23,13 +23,14 @@ fn part1(input: &str) -> i64 {
             let mut last = nums[0];
             for i in 0..nums.len() - 1 {
                 if (bits & (1 << i)) == 0 {
-                    last = last + nums[i + 1];
+                    last += nums[i + 1];
                 } else {
-                    last = last * nums[i + 1];
+                    last *= nums[i + 1];
                 }
             }
             if last == result {
                 okay = true;
+                break;
             }
         }
         if okay {
