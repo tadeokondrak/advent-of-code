@@ -20,11 +20,10 @@ fn part1(input: &str) -> i32 {
         for x in 0..grid.height as i32 {
             let pt = point(x, y);
             for (&_freq, points) in &antennae {
-                for &pt1 in points {
-                    for &pt2 in points {
-                        if pt1 == pt2 {
-                            continue;
-                        }
+                for i in 0..points.len() {
+                    for j in i + 1..points.len() {
+                        let pt1 = points[i];
+                        let pt2 = points[j];
                         if !(2 * pt.distance_from(pt1) == pt.distance_from(pt2)
                             || pt.distance_from(pt1) == 2 * pt.distance_from(pt2))
                         {
@@ -53,11 +52,10 @@ fn part2(input: &str) -> i32 {
             let pt = point(x, y);
             let mut has_antinode = false;
             'l: for (&_freq, points) in &antennae {
-                for &pt1 in points {
-                    for &pt2 in points {
-                        if pt1 == pt2 {
-                            continue;
-                        }
+                for i in 0..points.len() {
+                    for j in i + 1..points.len() {
+                        let pt1 = points[i];
+                        let pt2 = points[j];
                         let dir_to_pt1 = pt - pt1;
                         let dir_to_pt2 = pt - pt2;
                         let dir_to_pt1_multiplied =
