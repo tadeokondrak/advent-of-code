@@ -1,0 +1,8 @@
+[package]
+name = "aoc2024day10"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+index_list = "0.2.15"
+util.workspace = true
