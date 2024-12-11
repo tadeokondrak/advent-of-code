@@ -39,7 +39,11 @@ fn solve(input: &str, count: usize) -> i64 {
         cache.insert((num, counts_left), result);
         result
     }
-    let nums: Vec<i64> = input.trim().split(" ").map(|it| it.parse().unwrap()).collect();
+    let nums: Vec<i64> = input
+        .trim()
+        .split(" ")
+        .map(|it| it.parse().unwrap())
+        .collect();
     let mut cache = HashMap::default();
     nums.iter()
         .copied()
@@ -47,6 +51,7 @@ fn solve(input: &str, count: usize) -> i64 {
         .sum()
 }
 
+#[cfg(test)]
 mod tests {
     extern crate test;
 
