@@ -20,7 +20,7 @@ fn part2(input: &str) -> i64 {
     solve(input, 75)
 }
 
-fn solve(input: &str, count: usize) -> i64 {
+fn solve(input: &str, count: i64) -> i64 {
     fn go(num: i64, counts_left: i64, cache: &mut HashMap<(i64, i64), i64>) -> i64 {
         if counts_left == 0 {
             return 1;
@@ -39,14 +39,11 @@ fn solve(input: &str, count: usize) -> i64 {
         cache.insert((num, counts_left), result);
         result
     }
-    let nums: Vec<i64> = input
+    let mut cache = HashMap::default();
+    input
         .trim()
         .split(" ")
         .map(|it| it.parse().unwrap())
-        .collect();
-    let mut cache = HashMap::default();
-    nums.iter()
-        .copied()
         .map(|num| go(num, count as i64, &mut cache))
         .sum()
 }
