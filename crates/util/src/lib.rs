@@ -104,6 +104,17 @@ impl std::ops::Mul<i32> for Point {
     }
 }
 
+impl std::ops::Mul<i32> for Offset {
+    type Output = Self;
+
+    fn mul(self, rhs: i32) -> Self::Output {
+        Offset {
+            x: self.x * rhs,
+            y: self.y * rhs,
+        }
+    }
+}
+
 impl std::ops::Div<i32> for Point {
     type Output = Self;
 
@@ -231,5 +242,136 @@ impl<T, I: GridIndex> Index<I> for Grid<T> {
 impl<T, I: GridIndex> IndexMut<I> for Grid<T> {
     fn index_mut(&mut self, i: I) -> &mut T {
         self.get_mut(i).unwrap()
+    }
+}
+
+//
+
+pub fn point64(x: i64, y: i64) -> Point64 {
+    Point64 { x, y }
+}
+
+pub const fn offset64(x: i64, y: i64) -> Offset64 {
+    Offset64 { x, y }
+}
+
+#[derive(Clone, Copy, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Point64 {
+    pub x: i64,
+    pub y: i64,
+}
+
+#[derive(Clone, Copy, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Offset64 {
+    pub x: i64,
+    pub y: i64,
+}
+
+impl fmt::Debug for Point64 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("Point64")
+            .field(&self.x)
+            .field(&self.y)
+            .finish()
+    }
+}
+
+impl fmt::Debug for Offset64 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("Offset64")
+            .field(&self.x)
+            .field(&self.y)
+            .finish()
+    }
+}
+
+impl Point64 {
+    pub const ZERO: Point64 = Point64 { x: 0, y: 0 };
+
+    pub fn distance_from(self, other: Point64) -> i64 {
+        (self.x - other.x).abs() + (self.y - other.y).abs()
+    }
+}
+
+impl std::ops::Add<Offset64> for Point64 {
+    type Output = Self;
+
+    fn add(self, rhs: Offset64) -> Self::Output {
+        Point64 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+impl std::ops::Sub<Offset64> for Point64 {
+    type Output = Self;
+
+    fn sub(self, rhs: Offset64) -> Self::Output {
+        Point64 {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
+    }
+}
+
+impl std::ops::Add<Point64> for Point64 {
+    type Output = Self;
+
+    fn add(self, rhs: Point64) -> Self::Output {
+        Point64 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+impl std::ops::Sub<Point64> for Point64 {
+    type Output = Self;
+
+    fn sub(self, rhs: Point64) -> Self::Output {
+        Point64 {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
+    }
+}
+
+impl std::ops::Mul<i64> for Point64 {
+    type Output = Self;
+
+    fn mul(self, rhs: i64) -> Self::Output {
+        Point64 {
+            x: self.x * rhs,
+            y: self.y * rhs,
+        }
+    }
+}
+
+impl std::ops::Mul<i64> for Offset64 {
+    type Output = Self;
+
+    fn mul(self, rhs: i64) -> Self::Output {
+        Offset64 {
+            x: self.x * rhs,
+            y: self.y * rhs,
+        }
+    }
+}
+
+impl std::ops::Div<i64> for Point64 {
+    type Output = Self;
+
+    fn div(self, rhs: i64) -> Self::Output {
+        Point64 {
+            x: self.x / rhs,
+            y: self.y / rhs,
+        }
+    }
+}
+
+impl std::ops::AddAssign<Offset64> for Point64 {
+    fn add_assign(&mut self, rhs: Offset64) {
+        *self = *self + rhs;
     }
 }
