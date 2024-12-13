@@ -75,7 +75,7 @@ fn solve(a: Offset, b: Offset, prize: Point) -> Option<i64> {
     let x = det([prize.x, prize.y, b.x, b.y]) / det([a.x, a.y, b.x, b.y]);
     let y = det([a.x, a.y, prize.x, prize.y]) / det([a.x, a.y, b.x, b.y]);
     if origin + a * x + b * y == prize {
-        Some((x * 3 + y))
+        Some(x * 3 + y)
     } else {
         None
     }
