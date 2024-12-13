@@ -132,6 +132,18 @@ impl std::ops::AddAssign<Offset> for Point {
     }
 }
 
+impl From<Point> for [i32; 2] {
+    fn from(val: Point) -> [i32; 2] {
+        [val.x, val.y]
+    }
+}
+
+impl From<Offset> for [i32; 2] {
+    fn from(val: Offset) -> [i32; 2] {
+        [val.x, val.y]
+    }
+}
+
 #[derive(Clone)]
 pub struct Grid<T> {
     pub data: Vec<T>,
@@ -373,5 +385,17 @@ impl std::ops::Div<i64> for Point64 {
 impl std::ops::AddAssign<Offset64> for Point64 {
     fn add_assign(&mut self, rhs: Offset64) {
         *self = *self + rhs;
+    }
+}
+
+impl From<Point64> for [i64; 2] {
+    fn from(val: Point64) -> [i64; 2] {
+        [val.x, val.y]
+    }
+}
+
+impl From<Offset64> for [i64; 2] {
+    fn from(val: Offset64) -> [i64; 2] {
+        [val.x, val.y]
     }
 }

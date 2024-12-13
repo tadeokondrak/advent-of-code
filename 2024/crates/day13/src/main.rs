@@ -1,9 +1,6 @@
 #![feature(test)]
-use std::{
-    collections::{HashMap, HashSet},
-    io::{self, Read},
-};
-use util::{offset64 as offset, point64 as point, Grid, Offset64 as Offset, Point64 as Point};
+use std::io::{self, Read};
+use util::{offset64 as offset, point64 as point, Offset64 as Offset, Point64 as Point};
 
 fn main() {
     let mut input = String::new();
@@ -59,21 +56,13 @@ fn part2(input: &str) -> i64 {
 }
 
 fn solve(a: Offset, b: Offset, prize: Point) -> Option<i64> {
-    let mut solutions = Vec::new();
+    fn det(r: impl Into<[i64; 2]>, s: impl Into<[i64; 2]>) -> i64 {
+        let (r, s) = (r.into(), s.into());
+        r[0] * s[1] - r[1] * s[0]
+    }
     let origin = point(0, 0);
-    for a_count in 0..=100 {
-        for b_count in 0..=100 {
-            if origin + a * a_count + b * b_count == prize {
-                solutions.push((a_count, b_count));
-            }
-        }
-    }
-    fn det(m: [i64; 4]) -> i64 {
-        m[0] * m[3] - m[1] * m[2]
-    }
-
-    let x = det([prize.x, prize.y, b.x, b.y]) / det([a.x, a.y, b.x, b.y]);
-    let y = det([a.x, a.y, prize.x, prize.y]) / det([a.x, a.y, b.x, b.y]);
+    let x = det(prize, b) / det(a, b);
+    let y = det(a, prize) / det(a, b);
     if origin + a * x + b * y == prize {
         Some(x * 3 + y)
     } else {
@@ -111,26 +100,18 @@ Prize: X=18641, Y=10279";
             solve(offset(94, 34), offset(22, 67), point(8400, 5400)),
             Some(280)
         );
-        assert_eq!(part1(TEST_INPUT), 1930);
-    }
-
-    #[test]
-    #[ignore = "todo"]
-    fn test_part2() {
-        assert_eq!(part2(TEST_INPUT), 0);
+        assert_eq!(part1(TEST_INPUT), 480);
     }
 
     #[bench]
-    #[ignore = "todo"]
     fn real_p1(b: &mut Bencher) {
         let input = std::fs::read_to_string("input").unwrap();
-        b.iter(|| assert_eq!(part1(black_box(&input)), 0));
+        b.iter(|| assert_eq!(part1(black_box(&input)), 39748));
     }
 
     #[bench]
-    #[ignore = "todo"]
     fn real_p2(b: &mut Bencher) {
         let input = std::fs::read_to_string("input").unwrap();
-        b.iter(|| assert_eq!(part2(black_box(&input)), 0));
+        b.iter(|| assert_eq!(part2(black_box(&input)), 74478585072604));
     }
 }
