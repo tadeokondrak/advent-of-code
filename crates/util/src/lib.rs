@@ -187,7 +187,7 @@ impl<T> Grid<T> {
 impl<T> Grid<T> {
     pub fn is_in_bounds(&self, pos: impl GridIndex) -> bool {
         let (x, y) = pos.coords();
-        0 <= x && x < self.width as i32 && 0 <= y && y < self.width as i32
+        0 <= x && x < self.width as i32 && 0 <= y && y < self.height as i32
     }
 
     pub fn get(&self, pos: impl GridIndex) -> Option<&T> {
@@ -214,14 +214,12 @@ impl<T> Grid<T> {
 
 impl<T: Display> Debug for Grid<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for y in 0..self.width as i32 {
-            for x in 0..self.height as i32 {
+        for y in 0..self.height as i32 {
+            for x in 0..self.width as i32 {
                 let pt = point(x, y);
                 write!(f, "{}", self[pt])?;
             }
-            if y != self.width as i32 - 1 {
                 writeln!(f)?;
-            }
         }
         Ok(())
     }

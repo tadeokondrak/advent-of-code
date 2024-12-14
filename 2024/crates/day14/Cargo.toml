@@ -1,0 +1,8 @@
+[package]
+name = "aoc2024day14"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+itertools = "0.13.0"
+util.workspace = true
