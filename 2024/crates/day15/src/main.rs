@@ -1,8 +1,5 @@
 #![feature(test)]
-use std::{
-    collections::HashMap,
-    io::{self, Read},
-};
+use std::io::{self, Read};
 use util::{offset, point, Grid, Offset, Point};
 
 fn main() {
