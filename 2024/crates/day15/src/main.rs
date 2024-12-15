@@ -124,9 +124,6 @@ fn part2_wide(input: &str) -> i32 {
     let mut pos = find_starting_point(grid);
     let mut grid = Grid::parse(grid, |c| if c == '@' { '.' } else { c });
     let moves = moves.replace("\n", "");
-    eprintln!("{grid:?}");
-    let orig_grid = grid.clone();
-    let mut i = 0;
     for c in moves.chars() {
         let dir = match c {
             '^' => offset(0, -1),
@@ -143,45 +140,14 @@ fn part2_wide(input: &str) -> i32 {
             }
             '[' | ']' => {
                 if can_push_box(&old_grid, pos + dir, dir) {
-                    assert!(try_push_box(&old_grid, &mut grid, pos + dir, dir));
+                    assert!(try_push_box(&old_grid, &mut grid, pos + dir, dir, 0));
+                    assert!(try_push_box(&old_grid, &mut grid, pos + dir, dir, 1));
                     pos += dir;
                 }
             }
             c => todo!("{c}"),
         }
-        //eprintln!("{c} {pos:?}\n{grid:?}");
-        i += 1;
-        if i % 50 == 0 {
-            eprint!("\x1B[2J\x1B[1;1H");
-            for y in 0..grid.height as i32 {
-                for x in 0..grid.width as i32 {
-                    let pt = point(x, y);
-                    if pt == pos {
-                        eprint!("@");
-                    } else {
-                        eprint!("{}", grid[pt]);
-                    }
-                }
-                eprintln!();
-            }
-            std::thread::sleep_ms(1);
-        }
     }
-    std::thread::sleep_ms(1000);
-    eprintln!("{grid:?}");
-    assert_eq!(
-        orig_grid.data.iter().filter(|&&c| c == '#').count(),
-        grid.data.iter().filter(|&&c| c == '#').count()
-    );
-
-    assert_eq!(
-        orig_grid.data.iter().filter(|&&c| c == '[').count(),
-        grid.data.iter().filter(|&&c| c == '[').count()
-    );
-    assert_eq!(
-        orig_grid.data.iter().filter(|&&c| c == ']').count(),
-        grid.data.iter().filter(|&&c| c == ']').count()
-    );
 
     fn can_push_box(grid: &Grid<char>, pos: Point, dir: Offset) -> bool {
         if dir.y == 0 {
@@ -209,9 +175,9 @@ fn part2_wide(input: &str) -> i32 {
             match (lb_above, rb_above) {
                 ('.', '.') => true,
                 ('#', _) | (_, '#') => false,
-                ('[' | ']', _) | (_, '[' | ']') => {
-                    (lb_above == '.' || can_push_box(grid, lb_pt + dir, dir))
-                        && (rb_above == '.' || can_push_box(grid, rb_pt + dir, dir))
+                ('[' | ']' | '.', '[' | ']' | '.') => {
+                    (lb_above == '.' || can_push_box(grid, lb_above_pt, dir))
+                        && (rb_above == '.' || can_push_box(grid, rb_above_pt, dir))
                 }
                 other => todo!("{other:?}"),
             }
@@ -223,15 +189,18 @@ fn part2_wide(input: &str) -> i32 {
         new_grid: &mut Grid<char>,
         pos: Point,
         dir: Offset,
+        stage: u8,
     ) -> bool {
         assert!(can_push_box(old_grid, pos, dir));
         if dir.y == 0 {
-            if matches!(old_grid[pos + dir * 2], '[' | ']') {
-                try_push_box(old_grid, new_grid, pos + dir * 2, dir);
+            if stage == 0 {
+                if matches!(old_grid[pos + dir * 2], '[' | ']') {
+                    try_push_box(old_grid, new_grid, pos + dir * 2, dir, stage);
+                }
+                new_grid[pos + dir * 2] = new_grid[pos + dir];
+                new_grid[pos + dir] = new_grid[pos];
+                new_grid[pos] = '.';
             }
-            new_grid[pos + dir * 2] = new_grid[pos + dir];
-            new_grid[pos + dir] = new_grid[pos];
-            new_grid[pos] = '.';
         } else {
             let lb_pt = match old_grid[pos] {
                 '[' => pos,
@@ -243,18 +212,21 @@ fn part2_wide(input: &str) -> i32 {
             let lb_above = old_grid[lb_above_pt];
             let rb_above_pt = rb_pt + dir;
             let rb_above = old_grid[rb_above_pt];
-            if matches!((lb_above, rb_above), ('[' | ']', _) | (_, '[' | ']')) {
-                if lb_above != '.' {
-                    try_push_box(old_grid, new_grid, lb_pt + dir, dir);
-                }
-                if rb_above != '.' {
-                    try_push_box(old_grid, new_grid, rb_pt + dir, dir);
-                }
+            if stage == 0 {
+                new_grid[lb_pt] = '.';
+                new_grid[rb_pt] = '.';
             }
-            new_grid[lb_pt] = '.';
-            new_grid[rb_pt] = '.';
-            new_grid[lb_above_pt] = '[';
-            new_grid[rb_above_pt] = ']';
+            if stage == 1 {
+                new_grid[lb_above_pt] = '[';
+                new_grid[rb_above_pt] = ']';
+            }
+
+            if lb_above != '.' {
+                try_push_box(old_grid, new_grid, lb_above_pt, dir, stage);
+            }
+            if rb_above != '.' {
+                try_push_box(old_grid, new_grid, rb_above_pt, dir, stage);
+            }
         }
         true
     }
@@ -279,7 +251,7 @@ mod tests {
     use std::hint::black_box;
     use test::Bencher;
 
-    const LARGE_TEST_INPUT: &str = "##########
+    const TEST_INPUT: &str = "##########
 #..O..O.O#
 #......O.#
 #.OO..O.O#
@@ -303,45 +275,12 @@ v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^";
 
     #[test]
     fn test_part1() {
-        assert_eq!(part1(LARGE_TEST_INPUT), 10092);
+        assert_eq!(part1(TEST_INPUT), 10092);
     }
 
     #[test]
     fn test_part2() {
-        //        assert_eq!(
-        //            part2(
-        //                "#######
-        //#...#.#
-        //#.....#
-        //#..OO@#
-        //#..O..#
-        //#.....#
-        //#######
-        //
-        //<vv<<^^<<^^"
-        //            ),
-        //            618
-        //        );
-
-        //        part2_wide(
-        //            "############
-        //#..@.......#
-        //#..[]......#
-        //#...[].....#
-        //#....[]....#
-        //#.....[]...#
-        //#....[]....#
-        //#...[][]...#
-        //#..[]..[]..#
-        //#.[]....[].#
-        //#..[]..#...#
-        //#..........#
-        //############
-        //
-        //vvv",
-        //        );
-
-        //assert_eq!(part2(LARGE_TEST_INPUT), 9021);
+        assert_eq!(part2(TEST_INPUT), 9021);
     }
 
     #[bench]
