@@ -219,7 +219,7 @@ impl<T: Display> Debug for Grid<T> {
                 let pt = point(x, y);
                 write!(f, "{}", self[pt])?;
             }
-                writeln!(f)?;
+            writeln!(f)?;
         }
         Ok(())
     }
