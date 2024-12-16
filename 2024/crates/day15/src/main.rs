@@ -281,16 +281,14 @@ v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^";
     }
 
     #[bench]
-    #[ignore = "todo"]
     fn real_p1(b: &mut Bencher) {
         let input = std::fs::read_to_string("input").unwrap();
-        b.iter(|| assert_eq!(part1(black_box(&input)), 0));
+        b.iter(|| assert_eq!(part1(black_box(&input)), 1360570));
     }
 
     #[bench]
-    #[ignore = "todo"]
     fn real_p2(b: &mut Bencher) {
         let input = std::fs::read_to_string("input").unwrap();
-        b.iter(|| assert_eq!(part2(black_box(&input)), 0));
+        b.iter(|| assert_eq!(part2(black_box(&input)), 1381446));
     }
 }
