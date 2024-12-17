@@ -4,7 +4,6 @@ members = ["crates/*"]
 
 [workspace.dependencies]
 util.path = "../crates/util"
-window.path = "../crates/window"
 
 [profile.bench]
 lto = true

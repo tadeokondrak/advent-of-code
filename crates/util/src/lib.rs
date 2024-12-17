@@ -23,6 +23,13 @@ pub struct Offset {
     pub y: i32,
 }
 
+impl Offset {
+    pub const NORTH: Offset = offset(0, -1);
+    pub const EAST: Offset = offset(1, 0);
+    pub const SOUTH: Offset = offset(0, 1);
+    pub const WEST: Offset = offset(-1, 0);
+}
+
 impl fmt::Debug for Point {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("Point")
