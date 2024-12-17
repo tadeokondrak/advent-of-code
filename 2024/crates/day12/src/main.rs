@@ -60,41 +60,54 @@ fn part1(input: &str) -> i32 {
     let mut total = 0;
     for region in 0..next_id {
         let (&some_pt, _) = memberships.iter().find(|(_pt, &it)| it == region).unwrap();
-        let (area, perimeter) = area_stats(&memberships, region);
-        let mut enclave_perimeter_offset = 0;
+        let (area, perimeter) = area_stats(&grid, &memberships, region);
         for (&enclave, &container) in &enclaves {
             if container != region {
                 continue;
             }
-            let (_area, perimeter) = area_stats(&memberships, enclave);
-            enclave_perimeter_offset += perimeter;
+            let (_area, perimeter) = area_stats(&grid, &memberships, enclave);
         }
-        dbg!(grid[some_pt], area, perimeter, enclave_perimeter_offset);
-        total += (perimeter + enclave_perimeter_offset) * area;
-        eprintln!(
-            "{} * {} = {}",
-            (area),
-            (perimeter + enclave_perimeter_offset),
-            (perimeter + enclave_perimeter_offset) * area
-        );
+        total += (perimeter) * area;
+        //eprintln!("{} * {} = {}", (area), (perimeter), (perimeter) * area);
     }
     total
 }
 
-fn area_stats(memberships: &HashMap<Point, i32>, region: i32) -> (i32, i32) {
+fn area_stats(grid: &Grid<char>, memberships: &HashMap<Point, i32>, region: i32) -> (i32, i32) {
     let points = memberships
         .iter()
         .filter(|(_pt, &it)| it == region)
-        .map(|(pt, _)| pt);
-    // this is an incorrect way to find the perimeter
-    let min_x = points.clone().map(|pt| pt.x).min().unwrap();
-    let max_x = points.clone().map(|pt| pt.x).max().unwrap();
-    let min_y = points.clone().map(|pt| pt.y).min().unwrap();
-    let max_y = points.clone().map(|pt| pt.y).max().unwrap();
-    let width = max_x - min_x + 1;
-    let height = max_y - min_y + 1;
-    let area = points.count() as i32;
-    let perimeter = width * 2 + height * 2;
+        .map(|(pt, _)| pt)
+        .copied()
+        .collect::<HashSet<Point>>();
+    let mut region = HashSet::new();
+    let mut visited = HashSet::new();
+    let mut queue = Vec::new();
+    queue.push(points.clone().iter().next().copied().unwrap());
+    visited.insert(queue[0]);
+    let mut perimeter = 0;
+    while let Some(pt) = queue.pop() {
+        perimeter += 4;
+        for dir in [offset(0, -1), offset(1, 0), offset(0, 1), offset(-1, 0)] {
+            if region.contains(&(pt + dir)) {
+                perimeter -= 2;
+            }
+        }
+
+        for dir in [offset(0, -1), offset(1, 0), offset(0, 1), offset(-1, 0)] {
+            if !grid.is_in_bounds(pt + dir) {
+                continue;
+            }
+            if !points.contains(&(pt + dir)) {
+                continue;
+            }
+            if visited.insert(pt + dir) {
+                queue.push(pt + dir);
+            }
+        }
+        region.insert(pt);
+    }
+    let area = points.len() as i32;
     (area, perimeter)
 }
 
@@ -178,25 +191,25 @@ MMMISSJEEE";
 
     #[test]
     fn test_part1() {
-        //        assert_eq!(
-        //            part1(
-        //                "AAAA
-        //BBCD
-        //BBCC
-        //EEEC"
-        //            ),
-        //            140
-        //        );
-        //        assert_eq!(
-        //            part1(
-        //                "OOOOO
-        //OXOXO
-        //OOOOO
-        //OXOXO
-        //OOOOO"
-        //            ),
-        //            772
-        //        );
+        assert_eq!(
+            part1(
+                "AAAA
+BBCD
+BBCC
+EEEC"
+            ),
+            140
+        );
+        assert_eq!(
+            part1(
+                "OOOOO
+OXOXO
+OOOOO
+OXOXO
+OOOOO"
+            ),
+            772
+        );
         assert_eq!(part1(TEST_INPUT), 1930);
     }
 
