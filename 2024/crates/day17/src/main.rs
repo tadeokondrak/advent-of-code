@@ -253,7 +253,7 @@ fn part2(input: &str) -> String {
     }
     for expr in output.iter_mut() {
         for i in 0..1000 {
-            expr.simplify();
+            //expr.simplify();
         }
         eprintln!("{expr:?}");
     }
