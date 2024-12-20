@@ -3,6 +3,18 @@ use std::{
     ops::{Index, IndexMut},
 };
 
+pub fn find_point(input: &str, mark: char) -> Point {
+    let mut pos = None;
+    for (y, line) in input.lines().enumerate() {
+        for (x, ch) in line.chars().enumerate() {
+            if ch == mark {
+                pos = Some(point(x as i32, y as i32));
+            }
+        }
+    }
+    pos.unwrap()
+}
+
 pub fn point(x: i32, y: i32) -> Point {
     Point { x, y }
 }

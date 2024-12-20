@@ -1,10 +1,8 @@
 #![feature(test)]
-use std::cmp::Reverse as R;
 use std::{
-    collections::{BinaryHeap, HashMap, HashSet},
+    collections::HashMap,
     io::{self, Read},
 };
-use util::{point, Grid, Offset, Point};
 
 fn main() {
     let mut input = String::new();
