@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["*/crates/*", "2025/day01", "crates/util", "crates/window"]
+members = ["*/crates/*", "2025/day01", "2025/day02", "crates/util", "crates/window"]
 
 [workspace.dependencies]
 util.path = "crates/util"
