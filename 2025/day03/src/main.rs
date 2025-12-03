@@ -12,16 +12,16 @@ fn main() {
     println!("Part 2: {}", part2(&input));
 }
 
-fn part1(input: &str) -> i128 {
+fn part1(input: &str) -> i64 {
     let lines = input
         .lines()
         .map(|line| {
             line.chars()
                 .map(|c| c.to_digit(10).unwrap().into())
-                .collect::<Vec<i128>>()
+                .collect::<Vec<i64>>()
         })
-        .collect::<Vec<Vec<i128>>>();
-    let mut total = 0i128;
+        .collect::<Vec<Vec<i64>>>();
+    let mut total = 0i64;
     for line in lines {
         let mut largest = 0;
         for i in 0..line.len() {
@@ -35,16 +35,16 @@ fn part1(input: &str) -> i128 {
 }
 
 // brute force
-fn part2(input: &str) -> i128 {
+fn part2(input: &str) -> i64 {
     fn go(
-        line: &[i128],
-        amt: i128,
+        line: &[i64],
+        amt: i64,
         start: RangeFrom<usize>,
-        remaining: i128,
-        largest_seen: &mut i128,
-    ) -> i128 {
-        let shifted = amt * 10i128.pow((remaining) as u32);
-        let nines = 10i128.pow((remaining) as u32) - 1;
+        remaining: i64,
+        largest_seen: &mut i64,
+    ) -> i64 {
+        let shifted = amt * 10i64.pow((remaining) as u32);
+        let nines = 10i64.pow((remaining) as u32) - 1;
         let largest_possible = shifted + nines;
         if largest_possible < *largest_seen {
             return 0;
@@ -75,10 +75,10 @@ fn part2(input: &str) -> i128 {
         .map(|line| {
             line.chars()
                 .map(|c| c.to_digit(10).unwrap().into())
-                .collect::<Vec<i128>>()
+                .collect::<Vec<i64>>()
         })
-        .collect::<Vec<Vec<i128>>>();
-    let mut total = 0i128;
+        .collect::<Vec<Vec<i64>>>();
+    let mut total = 0i64;
     for line in lines {
         let largest = go(&line, 0, 0.., 12, &mut 0);
         total += largest;
