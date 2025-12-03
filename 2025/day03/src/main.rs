@@ -78,12 +78,17 @@ fn part2(input: &str) -> i64 {
                 .collect::<Vec<i64>>()
         })
         .collect::<Vec<Vec<i64>>>();
-    let mut total = 0i64;
-    for line in lines {
-        let largest = go(&line, 0, 0.., 12, &mut 0);
-        total += largest;
-    }
-    total
+    let total = std::sync::atomic::AtomicI64::new(0);
+    std::thread::scope(|s| {
+        for line in lines {
+            let total = &total;
+            s.spawn(move || {
+                let largest = go(&line, 0, 0.., 12, &mut 0);
+                total.fetch_add(largest, std::sync::atomic::Ordering::SeqCst);
+            });
+        }
+    });
+    total.load(std::sync::atomic::Ordering::SeqCst)
 }
 
 #[cfg(test)]
