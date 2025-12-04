@@ -1,3 +1,4 @@
+#![feature(test)]
 use std::io::{self, Read};
 use util::{Grid, offset, point};
 
@@ -12,25 +13,17 @@ fn main() {
 fn part1(input: &str) -> i64 {
     let grid = Grid::parse(input, |c| c);
     let mut count = 0;
-    for y in 0..grid.height as i32 {
-        for x in 0..grid.width as i32 {
-            if grid.get(point(x, y)).copied() != Some('@') {
-                continue;
-            }
-            let mut inner_count = 0;
-            for dx in [-1, 0, 1] {
-                for dy in [-1, 0, 1] {
-                    if dx == 0 && dy == 0 {
-                        continue;
-                    }
-                    if grid.get(point(x, y) + offset(dx, dy)).copied() == Some('@') {
-                        inner_count += 1;
-                    }
-                }
-            }
-            if inner_count < 4 {
-                count += 1;
-            }
+    for pt in grid.points() {
+        if grid.get(pt).copied() != Some('@') {
+            continue;
+        }
+        let inner_count = pt
+            .neighbors()
+            .into_iter()
+            .filter(|&neighbor| grid.get(neighbor).copied() == Some('@'))
+            .count();
+        if inner_count < 4 {
+            count += 1;
         }
     }
     count
@@ -41,37 +34,30 @@ fn part2(input: &str) -> i64 {
     let mut count = 0;
     loop {
         let mut did_anything = false;
-        for y in 0..grid.height as i32 {
-            for x in 0..grid.width as i32 {
-                if grid.get(point(x, y)).copied() != Some('@') {
-                    continue;
-                }
-                let mut inner_count = 0;
-                for dx in [-1, 0, 1] {
-                    for dy in [-1, 0, 1] {
-                        if dx == 0 && dy == 0 {
-                            continue;
-                        }
-                        if grid.get(point(x, y) + offset(dx, dy)).copied() == Some('@') {
-                            inner_count += 1;
-                        }
-                    }
-                }
-                if inner_count < 4 {
-                    count += 1;
-                    grid.set(point(x, y), '.');
-                    did_anything = true;
-                }
+        for pt in grid.points() {
+            if grid.get(pt).copied() != Some('@') {
+                continue;
+            }
+            let inner_count = pt
+                .neighbors()
+                .into_iter()
+                .filter(|&neighbor| grid.get(neighbor).copied() == Some('@'))
+                .count();
+            if inner_count < 4 {
+                count += 1;
+                grid.set(pt, '.');
+                did_anything = true;
             }
         }
         if !did_anything {
-            return count;
+            break count;
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
+    extern crate test;
     use super::*;
 
     const TEST_INPUT: &str = "..@@.@@@@.
@@ -87,11 +73,23 @@ mod tests {
 
     #[test]
     fn test_part1() {
-        assert_eq!(part1(TEST_INPUT), 357);
+        assert_eq!(part1(TEST_INPUT), 13);
     }
 
     #[test]
     fn test_part2() {
-        assert_eq!(part2(TEST_INPUT), 3121910778619);
+        assert_eq!(part2(TEST_INPUT), 43);
+    }
+
+    #[bench]
+    fn real_p1(b: &mut test::Bencher) {
+        let input = std::fs::read_to_string("input").unwrap();
+        b.iter(|| assert_eq!(part1(test::black_box(&input)), 1397));
+    }
+
+    #[bench]
+    fn real_p2(b: &mut test::Bencher) {
+        let input = std::fs::read_to_string("input").unwrap();
+        b.iter(|| assert_eq!(part2(test::black_box(&input)), 8758));
     }
 }

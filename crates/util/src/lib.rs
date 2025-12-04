@@ -66,6 +66,19 @@ impl Point {
     pub fn distance_from(self, other: Point) -> i32 {
         (self.x - other.x).abs() + (self.y - other.y).abs()
     }
+
+    pub fn neighbors(self) -> [Point; 8] {
+        [
+            point(self.x - 1, self.y - 1),
+            point(self.x, self.y - 1),
+            point(self.x + 1, self.y - 1),
+            point(self.x - 1, self.y),
+            point(self.x + 1, self.y),
+            point(self.x - 1, self.y + 1),
+            point(self.x, self.y + 1),
+            point(self.x + 1, self.y + 1),
+        ]
+    }
 }
 
 impl std::ops::Add<Offset> for Point {
@@ -228,6 +241,14 @@ impl<T> Grid<T> {
     pub fn set(&mut self, pos: impl GridIndex, v: T) {
         let (x, y) = pos.coords();
         *self.get_mut((x, y)).unwrap() = v;
+    }
+
+    pub fn points(&self) -> impl Iterator<Item = Point> + 'static {
+        let height = self.height as i32;
+        let width = self.width as i32;
+        (0..height)
+            .flat_map(move |y| (0..width).map(move |x| (x, y)))
+            .map(|(x, y)| point(x, y))
     }
 }
 
