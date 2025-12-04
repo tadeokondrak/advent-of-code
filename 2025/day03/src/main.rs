@@ -1,4 +1,3 @@
-#![feature(test)]
 use std::{
     io::{self, Read},
     ops::RangeFrom,
@@ -93,8 +92,6 @@ fn part2(input: &str) -> i64 {
 
 #[cfg(test)]
 mod tests {
-    extern crate test;
-
     use super::*;
 
     const TEST_INPUT: &str = "987654321111111

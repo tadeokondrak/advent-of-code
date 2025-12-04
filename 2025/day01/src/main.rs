@@ -1,4 +1,3 @@
-#![feature(test)]
 use std::io::{self, Read};
 
 fn main() {
@@ -63,7 +62,6 @@ fn part2(input: &str) -> i64 {
 
 #[cfg(test)]
 mod tests {
-    extern crate test;
     use super::*;
 
     const TEST_INPUT: &str = "L68
