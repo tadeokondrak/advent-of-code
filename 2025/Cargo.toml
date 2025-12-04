@@ -1,12 +1,9 @@
 [workspace]
 resolver = "2"
-members = [
-    "*/crates/*",
-    "crates/util",
-]
+members = ["crates/*"]
 
 [workspace.dependencies]
-util.path = "crates/util"
+util.path = "../crates/util"
 
 [profile.bench]
 lto = true
