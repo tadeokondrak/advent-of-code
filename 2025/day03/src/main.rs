@@ -51,18 +51,18 @@ fn part2(input: &str) -> i64 {
         if remaining == 0 || line[start.clone()].is_empty() {
             return amt;
         }
-        let with_first = go(
-            line,
-            amt * 10 + line[start.clone()][0],
-            start.clone().start + 1..,
-            remaining - 1,
-            largest_seen,
-        );
         let without_first = go(
             line,
             amt,
             start.clone().start + 1..,
             remaining,
+            largest_seen,
+        );
+        let with_first = go(
+            line,
+            amt * 10 + line[start.clone()][0],
+            start.clone().start + 1..,
+            remaining - 1,
             largest_seen,
         );
         let result = with_first.max(without_first);
