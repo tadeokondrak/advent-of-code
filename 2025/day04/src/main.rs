@@ -1,6 +1,6 @@
 #![feature(test)]
 use std::io::{self, Read};
-use util::{Grid, offset, point};
+use util::Grid;
 
 fn main() {
     let mut input = String::new();

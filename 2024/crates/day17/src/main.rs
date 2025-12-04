@@ -1,9 +1,6 @@
+#![allow(dead_code)]
 #![feature(test, box_patterns)]
-use std::{
-    collections::{BinaryHeap, HashMap, HashSet},
-    io::{self, Read},
-};
-use util::{point, Grid, Offset, Point};
+use std::io::{self, Read};
 
 fn main() {
     let mut input = String::new();
@@ -133,6 +130,7 @@ impl Expr {
         }
     }
 
+    #[allow(dead_code)]
     fn simplify(&mut self) {
         match self {
             Expr::Input => {}
@@ -173,7 +171,7 @@ fn part2(input: &str) -> String {
         .lines()
         .map(|line| line.split_once(": ").unwrap().1.parse::<i64>().unwrap())
         .collect::<Vec<i64>>();
-    let &[mut a, mut b, mut c, ..] = regs.as_slice() else {
+    let &[_a, b, c, ..] = regs.as_slice() else {
         panic!();
     };
 
@@ -191,7 +189,6 @@ fn part2(input: &str) -> String {
         .map(|it| it.parse::<i64>().unwrap())
         .collect::<Vec<_>>();
     {
-        let mut a_orig = a;
         let mut a = Expr::Input;
         let mut b = Expr::Const(0);
         let mut c = Expr::Const(0);
@@ -252,7 +249,7 @@ fn part2(input: &str) -> String {
         }
     }
     for expr in output.iter_mut() {
-        for i in 0..1000 {
+        for _i in 0..1000 {
             //expr.simplify();
         }
         eprintln!("{expr:?}");
@@ -308,7 +305,6 @@ fn part2(input: &str) -> String {
         //dbg!((i / 16777216) % 8);
         i += 8;
     }
-    "".to_owned()
 }
 
 #[cfg(test)]
@@ -316,8 +312,6 @@ mod tests {
     extern crate test;
 
     use super::*;
-    use std::hint::black_box;
-    use test::Bencher;
 
     const TEST_INPUT: &str = "Register A: 729
 Register B: 0
@@ -344,6 +338,7 @@ Program: 0,3,5,4,3,0"
         );
     }
 
+    /*
     #[bench]
     #[ignore = "reason"]
     fn real_p1(b: &mut Bencher) {
@@ -357,4 +352,5 @@ Program: 0,3,5,4,3,0"
         let input = std::fs::read_to_string("input").unwrap();
         //b.iter(|| assert_eq!(part2(black_box(&input)), 511));
     }
+    */
 }

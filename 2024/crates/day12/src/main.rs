@@ -59,13 +59,13 @@ fn part1(input: &str) -> i32 {
 
     let mut total = 0;
     for region in 0..next_id {
-        let (&some_pt, _) = memberships.iter().find(|(_pt, &it)| it == region).unwrap();
+        let (&_some_pt, _) = memberships.iter().find(|(_pt, &it)| it == region).unwrap();
         let (area, perimeter) = area_stats(&grid, &memberships, region);
         for (&enclave, &container) in &enclaves {
             if container != region {
                 continue;
             }
-            let (_area, perimeter) = area_stats(&grid, &memberships, enclave);
+            let (_area, _perimeter) = area_stats(&grid, &memberships, enclave);
         }
         total += (perimeter) * area;
         //eprintln!("{} * {} = {}", (area), (perimeter), (perimeter) * area);
@@ -166,7 +166,7 @@ fn flood2(
     }
 }
 
-fn part2(input: &str) -> i32 {
+fn part2(_input: &str) -> i32 {
     0
 }
 

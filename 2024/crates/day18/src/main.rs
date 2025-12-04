@@ -102,8 +102,6 @@ mod tests {
     extern crate test;
 
     use super::*;
-    use std::hint::black_box;
-    use test::Bencher;
 
     const TEST_INPUT: &str = "5,4
 4,2
@@ -139,6 +137,7 @@ mod tests {
     #[test]
     fn test_part2() {}
 
+    /*
     #[bench]
     #[ignore = "reason"]
     fn real_p1(b: &mut Bencher) {
@@ -152,4 +151,5 @@ mod tests {
         let input = std::fs::read_to_string("input").unwrap();
         //b.iter(|| assert_eq!(part2(black_box(&input)), 511));
     }
+    */
 }

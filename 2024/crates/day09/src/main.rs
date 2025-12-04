@@ -1,7 +1,7 @@
+#![allow(dead_code)] // probably unfinished?
 #![feature(test, linked_list_cursors)]
-use index_list::{Index, IndexList, ListIndex};
+use index_list::{IndexList, ListIndex};
 use std::{
-    collections::LinkedList,
     io::{self, Read},
     iter::Map,
     str::Chars,
@@ -322,7 +322,7 @@ fn part2(input: &str) -> u64 {
 
 fn replace_with_hole(tape: &mut IndexList<Entry>, mut idx: ListIndex) {
     let &Entry::File {
-        id: file_id,
+        id: _file_id,
         size: mut file_size,
     } = tape.get(idx).unwrap()
     else {

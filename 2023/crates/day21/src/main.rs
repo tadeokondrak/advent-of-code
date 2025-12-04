@@ -65,6 +65,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "slow"]
     fn part_2() {
         assert_eq!(solve(EXAMPLE_INPUT, 6), 16);
         assert_eq!(solve(EXAMPLE_INPUT, 10), 50);

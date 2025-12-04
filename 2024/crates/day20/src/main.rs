@@ -150,7 +150,7 @@ fn run_pathfinding(
     (distances, cheat_locations)
 }
 
-fn part2(input: &str) -> i64 {
+fn part2(_input: &str) -> i64 {
     0
 }
 
@@ -159,8 +159,6 @@ mod tests {
     extern crate test;
 
     use super::*;
-    use std::hint::black_box;
-    use test::Bencher;
 
     const TEST_INPUT: &str = "###############
 #...#...#.....#
@@ -188,6 +186,7 @@ mod tests {
         assert_eq!(part2(TEST_INPUT), 0);
     }
 
+    /*
     #[bench]
     #[ignore = "reason"]
     fn real_p1(b: &mut Bencher) {
@@ -201,4 +200,5 @@ mod tests {
         let input = std::fs::read_to_string("input").unwrap();
         //b.iter(|| assert_eq!(part2(black_box(&input)), 511));
     }
+    */
 }

@@ -43,7 +43,7 @@ fn is_end(packed: u16) -> bool {
     (packed & 0b11111) as u8 == 25
 }
 
-fn parse<'a>(input: &str) -> Parsed {
+fn parse<'a>(input: &str) -> Parsed<'_> {
     let (directions, links) = input.split_once("\n\n").unwrap();
     let mut all = Vec::new();
     let mut lefts = [0; pack("ZZZ") as usize + 1];

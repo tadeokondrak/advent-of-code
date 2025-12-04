@@ -105,7 +105,7 @@ impl Intcode {
         Ok(&mut self.mem[idx as usize])
     }
 
-    pub fn step(&mut self) -> Result<Step, Error> {
+    pub fn step(&mut self) -> Result<Step<'_>, Error> {
         let instr = self.load(LOAD_IMM, 0)?;
         let mode = (instr / 100 % 10, instr / 1000 % 10, instr / 10000 % 10);
         let op = instr % 100;
