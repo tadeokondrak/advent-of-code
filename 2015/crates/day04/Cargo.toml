@@ -1,0 +1,7 @@
+[package]
+name = "aoc2015day04"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+trig-const = "0.3.0"
