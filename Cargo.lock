@@ -529,6 +529,13 @@ name = "aoc2025day03"
 version = "0.1.0"
 
 [[package]]
+name = "aoc2025day04"
+version = "0.1.0"
+dependencies = [
+ "util",
+]
+
+[[package]]
 name = "arrayref"
 version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
