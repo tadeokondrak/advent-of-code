@@ -16,7 +16,7 @@ fn make_table() -> [u32; 64] {
         if i > 64 {
             break;
         }
-        t[i - 1] = f64::floor(4294967296.0f64 * f64::abs(trig_const::sin(i as f64))) as u32;
+        t[i - 1] = f64::floor(4294967296.0f64 * f64::abs(f64::sin(i as f64))) as u32;
         i += 1;
     }
     t
