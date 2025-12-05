@@ -18,5 +18,9 @@ dependencies = [
 ]
 
 [[package]]
+name = "aoc2015day07"
+version = "0.1.0"
+
+[[package]]
 name = "util"
 version = "0.1.0"

@@ -27,6 +27,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "aoc2015day07"
+version = "0.1.0"
+
+[[package]]
 name = "aoc2018day01"
 version = "0.1.0"
 
