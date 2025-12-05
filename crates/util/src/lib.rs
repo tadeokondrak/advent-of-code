@@ -1,6 +1,8 @@
 use std::{
+    convert::Infallible,
     fmt::{self, Debug, Display},
     ops::{Index, IndexMut},
+    str::FromStr,
 };
 
 pub fn find_point(input: &str, mark: char) -> Point {
@@ -78,6 +80,15 @@ impl Point {
             point(self.x, self.y + 1),
             point(self.x + 1, self.y + 1),
         ]
+    }
+}
+
+impl FromStr for Point {
+    type Err = Infallible;
+
+    fn from_str(s: &str) -> Result<Point, Infallible> {
+        let (x, y) = s.split_once([',']).unwrap();
+        Ok(point(x.parse().unwrap(), y.parse().unwrap()))
     }
 }
 

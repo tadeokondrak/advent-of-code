@@ -20,6 +20,13 @@ name = "aoc2015day05"
 version = "0.1.0"
 
 [[package]]
+name = "aoc2015day06"
+version = "0.1.0"
+dependencies = [
+ "util",
+]
+
+[[package]]
 name = "aoc2018day01"
 version = "0.1.0"
 
