@@ -84,27 +84,25 @@ mod tests {
 
     #[test]
     fn test_part1() {
-        assert_eq!(part1(TEST_INPUT), 0);
+        assert_eq!(part1(TEST_INPUT), 21);
     }
 
     #[test]
     fn test_part2() {
-        assert_eq!(part2(TEST_INPUT), 3263827);
+        assert_eq!(part2(TEST_INPUT), 40);
     }
 
     #[bench]
-    #[ignore = "reason"]
     fn real_p1(b: &mut test::Bencher) {
         let input = std::fs::read_to_string("input").unwrap();
         let input = input.trim();
-        b.iter(|| assert_eq!(part1(test::black_box(&input)), 5977759036837));
+        b.iter(|| assert_eq!(part1(test::black_box(&input)), 1490));
     }
 
     #[bench]
-    #[ignore = "reason"]
     fn real_p2(b: &mut test::Bencher) {
         let input = std::fs::read_to_string("input").unwrap();
         let input = input.trim();
-        b.iter(|| assert_eq!(part2(test::black_box(&input)), 9630000828442));
+        b.iter(|| assert_eq!(part2(test::black_box(&input)), 3806264447357));
     }
 }
